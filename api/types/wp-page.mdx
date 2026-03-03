@@ -1,0 +1,288 @@
+---
+title: WPPage
+description: TypeScript interface for WordPress page data in the VENCOL Front Template
+---
+
+## Overview
+
+The `WPPage` interface represents a static page fetched from the WordPress CMS. It's used for dynamic content pages that are managed in WordPress but rendered in the React application, providing flexibility for content updates without code deployments.
+
+## Type Definition
+
+```typescript
+export interface WPPage {
+  id: number;
+  slug: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  date: string;
+  image: string;
+}
+```
+
+**Source:** `source/types.ts:45-52`
+
+## Properties
+
+<ParamField path="id" type="number" required>
+  Unique WordPress page ID from the CMS database. Used for identification and caching.
+</ParamField>
+
+<ParamField path="slug" type="string" required>
+  URL-friendly page identifier. Matches the WordPress slug and is used for routing in the React app.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The page title, typically displayed as an H1 heading. HTML entities are stripped during mapping.
+</ParamField>
+
+<ParamField path="content" type="string" required>
+  Full HTML content of the page. Contains rich text, images, and any WordPress block editor content.
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  Short summary or description of the page. HTML is stripped for plain text use in meta tags.
+</ParamField>
+
+<ParamField path="date" type="string" required>
+  Publication or last modified date in localized format (e.g., `"3 feb. 2024"`).
+</ParamField>
+
+<ParamField path="image" type="string" required>
+  URL of the featured image. May be an empty string if no featured image is set in WordPress.
+</ParamField>
+
+## Usage Examples
+
+### Fetching WordPress Pages
+
+The primary use case is fetching pages from WordPress REST API:
+
+```typescript
+import { WPPage } from '../types';
+
+const WP_API_URL = 'https://cms.gobigagency.co/vencol/wp-json/wp/v2';
+
+export async function fetchWPPageBySlug(slug: string): Promise<WPPage | null> {
+  const res = await fetch(
+    `${WP_API_URL}/pages?slug=${encodeURIComponent(slug)}&_embed`
+  );
+
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+
+  const pages: WPPost[] = await res.json();
+  if (pages.length === 0) return null;
+  
+  return mapWPPageToWPPage(pages[0]);
+}
+```
+
+**Source:** `source/lib/wordpress.ts:82-94`
+
+### Mapping WordPress API Response
+
+Converting WordPress REST API data to the `WPPage` interface:
+
+```typescript
+import { WPPage } from '../types';
+
+interface WPPost {
+  id: number;
+  date: string;
+  slug: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
+  content: { rendered: string };
+  _embedded?: {
+    'wp:featuredmedia'?: Array<{ source_url: string }>;
+  };
+}
+
+function stripHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent?.trim() || '';
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function mapWPPageToWPPage(page: WPPost): WPPage {
+  const featuredImage =
+    page._embedded?.['wp:featuredmedia']?.[0]?.source_url || '';
+
+  return {
+    id: page.id,
+    slug: page.slug,
+    title: stripHtml(page.title.rendered),
+    content: page.content.rendered,
+    excerpt: stripHtml(page.excerpt.rendered),
+    date: formatDate(page.date),
+    image: featuredImage,
+  };
+}
+```
+
+**Source:** `source/lib/wordpress.ts:5-67`
+
+### Rendering a WordPress Page
+
+Using the `WPPage` data in a React component:
+
+```typescript
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { WPPage } from '../types';
+import { fetchWPPageBySlug } from '../lib/wordpress';
+
+const PageDetail: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [page, setPage] = useState<WPPage | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+    
+    fetchWPPageBySlug(slug)
+      .then(setPage)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) return <div>Loading...</div>;
+  if (!page) return <div>Page not found</div>;
+
+  return (
+    <article className="container mx-auto px-4 py-12">
+      {page.image && (
+        <img 
+          src={page.image} 
+          alt={page.title}
+          className="w-full h-96 object-cover rounded-lg mb-8"
+        />
+      )}
+      <h1 className="text-4xl font-bold mb-4">{page.title}</h1>
+      <time className="text-gray-500 text-sm">{page.date}</time>
+      <div 
+        className="prose prose-lg mt-8"
+        dangerouslySetInnerHTML={{ __html: page.content }}
+      />
+    </article>
+  );
+};
+```
+
+**Source:** `source/pages/PageDetail.tsx`
+
+## Comparison with BlogPost
+
+While `WPPage` and `BlogPost` have similar structures, they serve different purposes:
+
+| Property | WPPage | BlogPost |
+|----------|--------|----------|
+| **Purpose** | Static pages (About, Legal, etc.) | Blog articles/posts |
+| **Category** | ❌ No category field | ✅ Has category field |
+| **Usage** | Single pages by slug | Lists and archives |
+| **Content Type** | Long-form static content | Time-based articles |
+
+```typescript
+// BlogPost has category
+interface BlogPost {
+  // ... other fields
+  category: string; // "Educativo", "Tecnología", etc.
+}
+
+// WPPage does not
+interface WPPage {
+  // ... other fields
+  // No category field
+}
+```
+
+## API Integration Notes
+
+<Info>
+  The `WPPage` interface is designed to work with the WordPress REST API v2. Ensure your WordPress site has the REST API enabled and publicly accessible.
+</Info>
+
+### Required WordPress API Parameters
+
+When fetching pages, use these query parameters:
+
+- `slug` - Filter by page slug
+- `_embed` - Include embedded data (featured media, authors, etc.)
+
+```typescript
+const apiUrl = `${WP_API_URL}/pages?slug=${slug}&_embed`;
+```
+
+### Handling Missing Featured Images
+
+The `image` field may be empty if no featured image is set:
+
+```typescript
+const featuredImage = 
+  page._embedded?.['wp:featuredmedia']?.[0]?.source_url || '';
+
+// In component, check before rendering
+{page.image && (
+  <img src={page.image} alt={page.title} />
+)}
+```
+
+## Security Considerations
+
+<Warning>
+  The `content` field contains raw HTML from WordPress. Always sanitize or use `dangerouslySetInnerHTML` with caution. Ensure your WordPress installation is secure and only trusted users can edit pages.
+</Warning>
+
+### Safe Rendering
+
+```typescript
+// Safe: React handles HTML entities in title
+<h1>{page.title}</h1>
+
+// Requires caution: Raw HTML rendering
+<div dangerouslySetInnerHTML={{ __html: page.content }} />
+
+// Safe: Plain text excerpt
+<p>{page.excerpt}</p>
+```
+
+## Date Localization
+
+Dates are formatted using Spanish locale by default:
+
+```typescript
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+// Output: "3 feb. 2024"
+```
+
+To customize for different locales, modify the `formatDate` function.
+
+## Related Types
+
+- **BlogPost** - Similar structure for blog posts with additional category field
+- **Service** - Another content type for product/service pages
+
+## TypeScript Notes
+
+- All properties are required (non-optional)
+- The `image` field is a string but may be empty (`""`)
+- The `content` field contains HTML strings, not React elements
+- Returns `null` from fetch function if page not found (handle in components)

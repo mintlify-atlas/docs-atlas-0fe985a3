@@ -1,0 +1,515 @@
+---
+title: Styling & Design System
+description: Explore Tailwind CSS usage, glassmorphism design patterns, and custom styling in the VENCOL Front Template
+---
+
+## Styling Architecture
+
+The VENCOL Front Template uses a combination of:
+- **Tailwind CSS** via CDN for utility-first styling
+- **Custom CSS** for glassmorphism effects
+- **Inline Tailwind configuration** for brand customization
+
+## Tailwind CSS Setup
+
+### CDN Configuration
+
+Tailwind is loaded via CDN in `index.html`:
+
+```html index.html
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+```
+
+The Typography plugin is included for rich text content from WordPress.
+
+### Custom Configuration
+
+Tailwind is configured inline with brand colors and custom animations:
+
+```html index.html
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+        },
+        colors: {
+          glass: {
+            100: 'rgba(255, 255, 255, 0.1)',
+            200: 'rgba(255, 255, 255, 0.2)',
+            border: 'rgba(255, 255, 255, 0.1)',
+            text: 'rgba(255, 255, 255, 0.9)',
+            muted: 'rgba(255, 255, 255, 0.6)',
+          },
+          brand: {
+            green: '#56b501',
+            dark: '#1a1a1a',
+          }
+        },
+        backdropBlur: {
+          xs: '2px',
+        },
+        animation: {
+          marquee: 'marquee 30s linear infinite',
+        },
+        keyframes: {
+          marquee: {
+            '0%': { transform: 'translateX(0)' },
+            '100%': { transform: 'translateX(-50%)' },
+          }
+        }
+      }
+    }
+  }
+</script>
+```
+
+## Color System
+
+### Brand Colors
+
+<CodeGroup>
+```css Primary Green
+#56b501 - brand-green
+Used for CTAs, highlights, and active states
+```
+
+```css Dark Background
+#1a1a1a - brand-dark
+Main background color (dark gray/zinc tone)
+```
+</CodeGroup>
+
+### Glass Colors
+
+Semi-transparent colors for glassmorphism effects:
+
+| Class | Value | Usage |
+|-------|-------|-------|
+| `glass-100` | `rgba(255, 255, 255, 0.1)` | Light glass elements |
+| `glass-200` | `rgba(255, 255, 255, 0.2)` | Brighter glass elements |
+| `glass-border` | `rgba(255, 255, 255, 0.1)` | Border color |
+| `glass-text` | `rgba(255, 255, 255, 0.9)` | Primary text |
+| `glass-muted` | `rgba(255, 255, 255, 0.6)` | Muted/secondary text |
+
+### Usage Examples
+
+```tsx
+// Brand colors
+<div className="bg-brand-dark text-brand-green">
+  Vencol Content
+</div>
+
+// Glass colors
+<p className="text-glass-muted border-glass-border">
+  Secondary text with subtle border
+</p>
+```
+
+## Glassmorphism Design
+
+### Glass Panel Class
+
+The core glassmorphism style is defined as a custom CSS class:
+
+```css index.html
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+```
+
+**Usage:**
+```tsx
+<nav className="glass-panel border-b border-white/5">
+  Navigation content
+</nav>
+```
+
+### Glass Button Class
+
+Buttons with glassmorphism effect:
+
+```css index.html
+.glass-button {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+```
+
+**Usage:**
+```tsx
+<Link to="/contact" className="glass-button px-8 py-4 rounded-full">
+  Contact Us
+</Link>
+```
+
+### GlassCard Component
+
+A reusable React component that wraps the glass effect:
+
+```tsx GlassCard.tsx
+import React, { ReactNode } from 'react';
+
+interface GlassCardProps {
+  children: ReactNode;
+  className?: string;
+  hoverEffect?: boolean;
+}
+
+export const GlassCard: React.FC<GlassCardProps> = ({ 
+  children, 
+  className = '', 
+  hoverEffect = false 
+}) => {
+  return (
+    <div 
+      className={`
+        glass-panel rounded-2xl p-6 transition-all duration-300
+        ${hoverEffect ? 'hover:bg-white/5 hover:-translate-y-1 hover:shadow-lg hover:shadow-brand-green/10' : ''}
+        ${className}
+      `}
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+**Usage:**
+```tsx
+<GlassCard hoverEffect className="p-8">
+  <h3>Card Title</h3>
+  <p>Card content with glass effect</p>
+</GlassCard>
+```
+
+<Info>
+  The `hoverEffect` prop adds interactive hover animations including lift effect and green glow.
+</Info>
+
+## Background Effects
+
+### Animated Blobs
+
+Decorative background elements with blur:
+
+```tsx BackgroundBlobs.tsx
+export const BackgroundBlobs: React.FC = () => {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="blob bg-zinc-600/20 w-96 h-96 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2 mix-blend-screen animate-pulse duration-[10000ms]"></div>
+      <div className="blob bg-brand-green/10 w-[500px] h-[500px] rounded-full bottom-0 right-0 translate-x-1/3 translate-y-1/3 mix-blend-screen"></div>
+      <div className="blob bg-gray-500/10 w-80 h-80 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mix-blend-overlay"></div>
+    </div>
+  );
+};
+```
+
+The `.blob` class provides the blur effect:
+
+```css
+.blob {
+  position: absolute;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.6;
+}
+```
+
+## Typography
+
+### Font Family
+
+The application uses **Inter** from Google Fonts:
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+```
+
+Configured as the default sans-serif font:
+
+```js
+fontFamily: {
+  sans: ['Inter', 'sans-serif'],
+}
+```
+
+### Text Styling Patterns
+
+```tsx
+// Headings
+<h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight">
+  Main Heading
+</h1>
+
+// Gradient text
+<span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-green to-lime-200">
+  Highlighted Text
+</span>
+
+// Body text
+<p className="text-xl text-gray-200 leading-relaxed">
+  Body content
+</p>
+
+// Muted text
+<p className="text-glass-muted">
+  Secondary information
+</p>
+```
+
+### WordPress Content Styling
+
+The Typography plugin provides prose classes for WordPress content:
+
+```tsx PageDetail.tsx
+<div
+  className="prose prose-invert prose-lg max-w-none
+    prose-headings:text-white prose-headings:font-bold
+    prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 
+    prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-3
+    prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-brand-green
+    prose-p:text-gray-300 prose-p:leading-8 prose-p:mb-6
+    prose-strong:text-white
+    prose-a:text-brand-green prose-a:no-underline hover:prose-a:underline
+    prose-ul:text-gray-300 prose-ol:text-gray-300
+    prose-li:mb-2
+    prose-blockquote:border-l-brand-green prose-blockquote:text-gray-400
+    prose-img:rounded-xl prose-img:border prose-img:border-white/10
+  "
+  dangerouslySetInnerHTML={{ __html: page.content }}
+/>
+```
+
+## Custom Animations
+
+### Marquee Animation
+
+Infinite scrolling for partner logos:
+
+```css
+animation: {
+  marquee: 'marquee 30s linear infinite',
+}
+keyframes: {
+  marquee: {
+    '0%': { transform: 'translateX(0)' },
+    '100%': { transform: 'translateX(-50%)' },
+  }
+}
+```
+
+**Usage:**
+```tsx Home.tsx
+<div className="animate-marquee whitespace-nowrap flex gap-16">
+  {logos.map((logo) => (
+    <img src={logo} alt="Partner" />
+  ))}
+</div>
+```
+
+### Hover Effects
+
+Common interactive effects:
+
+```tsx
+// Scale on hover
+<button className="hover:scale-105 transition-transform">
+  Button
+</button>
+
+// Translate on hover
+<ArrowRight className="group-hover:translate-x-1 transition-transform" />
+
+// Rotate on hover
+<ChevronDown className="group-hover:rotate-180 transition-transform" />
+
+// Glow on hover
+<div className="hover:shadow-[0_0_20px_rgba(86,181,1,0.4)] transition-all">
+  Content
+</div>
+```
+
+## Responsive Design
+
+### Breakpoint Strategy
+
+Tailwind's default breakpoints are used:
+
+| Breakpoint | Min Width | Usage |
+|------------|-----------|-------|
+| `sm:` | 640px | Small tablets |
+| `md:` | 768px | Tablets, show desktop nav |
+| `lg:` | 1024px | Desktop |
+| `xl:` | 1280px | Large desktop |
+
+### Common Patterns
+
+```tsx
+// Responsive grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {/* Cards */}
+</div>
+
+// Responsive text size
+<h1 className="text-3xl md:text-5xl lg:text-7xl">
+  Responsive Heading
+</h1>
+
+// Responsive spacing
+<section className="py-12 md:py-20 lg:py-32">
+  Content
+</section>
+
+// Hide on mobile
+<div className="hidden md:block">
+  Desktop only content
+</div>
+
+// Show only on mobile
+<div className="md:hidden">
+  Mobile only content
+</div>
+```
+
+## Custom Scrollbar
+
+Custom scrollbar styling for brand consistency:
+
+```css index.html
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #56b501;
+}
+```
+
+## WordPress Alignment Classes
+
+Support for WordPress block editor alignment:
+
+```css index.html
+.aligncenter {
+  clear: both;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.alignleft {
+  display: inline;
+  float: left;
+  margin-right: 1.5em;
+}
+.alignright {
+  display: inline;
+  float: right;
+  margin-left: 1.5em;
+}
+```
+
+## Styling Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Utility Classes">
+    Prefer Tailwind utilities over custom CSS:
+    
+    ```tsx
+    // Good
+    <div className="flex items-center gap-4">
+    
+    // Avoid
+    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    ```
+  </Accordion>
+  
+  <Accordion title="Consistent Spacing">
+    Use Tailwind's spacing scale for consistency:
+    - Small gaps: `gap-2`, `gap-4`
+    - Medium spacing: `p-6`, `p-8`, `mb-8`
+    - Large spacing: `py-16`, `py-24`, `py-32`
+  </Accordion>
+  
+  <Accordion title="Glass Effects">
+    Use `GlassCard` component or `glass-panel` class instead of recreating the effect:
+    
+    ```tsx
+    // Good
+    <GlassCard>Content</GlassCard>
+    
+    // Good
+    <div className="glass-panel">Content</div>
+    
+    // Avoid recreating
+    <div className="bg-white/5 backdrop-blur-xl border border-white/10">
+      Content
+    </div>
+    ```
+  </Accordion>
+  
+  <Accordion title="Color Usage">
+    - Use `brand-green` for CTAs and highlights
+    - Use `brand-dark` for backgrounds
+    - Use `text-glass-muted` for secondary text
+    - Use `text-white` for primary text
+  </Accordion>
+</AccordionGroup>
+
+## Design Tokens Reference
+
+<CodeGroup>
+```jsx Colors
+// Brand
+brand-green: '#56b501'
+brand-dark: '#1a1a1a'
+
+// Glass
+glass-100: 'rgba(255, 255, 255, 0.1)'
+glass-200: 'rgba(255, 255, 255, 0.2)'
+glass-border: 'rgba(255, 255, 255, 0.1)'
+glass-text: 'rgba(255, 255, 255, 0.9)'
+glass-muted: 'rgba(255, 255, 255, 0.6)'
+```
+
+```jsx Effects
+// Glass panel
+background: rgba(255, 255, 255, 0.03)
+backdrop-filter: blur(16px)
+border: 1px solid rgba(255, 255, 255, 0.1)
+
+// Glass button
+background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))
+backdrop-filter: blur(4px)
+border: 1px solid rgba(255,255,255,0.18)
+```
+
+```jsx Typography
+font-family: 'Inter', sans-serif
+
+// Sizes
+text-xs: 0.75rem
+text-sm: 0.875rem
+text-base: 1rem
+text-lg: 1.125rem
+text-xl: 1.25rem
+text-2xl: 1.5rem
+text-3xl: 1.875rem
+text-5xl: 3rem
+text-7xl: 4.5rem
+```
+</CodeGroup>

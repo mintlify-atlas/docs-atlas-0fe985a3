@@ -1,0 +1,130 @@
+---
+title: fetchBlogPosts
+description: Fetch blog posts from WordPress CMS
+---
+
+## Function Signature
+
+```typescript
+export async function fetchBlogPosts(perPage = 10): Promise<BlogPost[]>
+```
+
+Fetches blog posts from the WordPress CMS API endpoint. This function retrieves posts with embedded media and taxonomy data, then transforms them into the application's `BlogPost` format.
+
+## Parameters
+
+<ParamField path="perPage" type="number" default="10">
+  The number of blog posts to retrieve per request. Optional parameter that defaults to 10 posts.
+</ParamField>
+
+## Return Type
+
+<ResponseField name="BlogPost[]" type="Promise<BlogPost[]>">
+  Returns a Promise that resolves to an array of blog post objects.
+
+  <Expandable title="BlogPost properties">
+    <ResponseField name="id" type="number">
+      Unique identifier for the blog post
+    </ResponseField>
+
+    <ResponseField name="title" type="string">
+      The post title with HTML tags stripped
+    </ResponseField>
+
+    <ResponseField name="slug" type="string">
+      URL-friendly slug for the post
+    </ResponseField>
+
+    <ResponseField name="excerpt" type="string">
+      Short excerpt of the post content with HTML tags stripped
+    </ResponseField>
+
+    <ResponseField name="content" type="string">
+      Full HTML content of the post
+    </ResponseField>
+
+    <ResponseField name="date" type="string">
+      Formatted publication date in Spanish locale (e.g., "3 mar 2026")
+    </ResponseField>
+
+    <ResponseField name="image" type="string">
+      URL of the featured image, defaults to placeholder if not available
+    </ResponseField>
+
+    <ResponseField name="category" type="string">
+      Primary category name, defaults to "General" if not specified
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Behavior
+
+- Makes a GET request to the WordPress REST API `/posts` endpoint
+- Includes `_embed` parameter to fetch related media and taxonomy data
+- Strips HTML tags from title and excerpt fields
+- Formats dates using Spanish locale (es-ES)
+- Provides fallback placeholder image if featured media is not available
+- Throws an error if the API request fails
+
+## Error Handling
+
+Throws an error with the format:
+```typescript
+throw new Error(`WordPress API error: ${res.status}`);
+```
+
+## Usage Example
+
+### Basic Usage (Default 10 Posts)
+
+```typescript
+import { fetchBlogPosts } from '../lib/wordpress';
+import { BlogPost } from '../types';
+
+const [posts, setPosts] = useState<BlogPost[]>([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  fetchBlogPosts()
+    .then((wpPosts) => {
+      if (wpPosts.length > 0) setPosts(wpPosts);
+    })
+    .catch((err) => console.warn('Error fetching WP posts, using fallback:', err))
+    .finally(() => setLoading(false));
+}, []);
+```
+
+### Custom Number of Posts
+
+```typescript
+import { fetchBlogPosts } from '../lib/wordpress';
+
+// Fetch 20 posts
+const posts = await fetchBlogPosts(20);
+```
+
+### With Error Handling
+
+```typescript
+import { fetchBlogPosts } from '../lib/wordpress';
+
+try {
+  const posts = await fetchBlogPosts(15);
+  console.log(`Fetched ${posts.length} blog posts`);
+} catch (error) {
+  console.error('Failed to fetch blog posts:', error);
+  // Use fallback data or show error message
+}
+```
+
+## API Endpoint
+
+The function connects to:
+```
+https://cms.gobigagency.co/vencol/wp-json/wp/v2/posts?per_page={perPage}&_embed
+```
+
+## Related
+
+- [fetchWPPageBySlug](/api/wordpress/fetch-wp-page) - Fetch individual WordPress pages by slug
+- [BlogPost Type](/api/types#blogpost) - Type definition for blog post objects

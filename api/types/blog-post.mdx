@@ -1,0 +1,188 @@
+---
+title: BlogPost
+description: TypeScript interface for blog post data in the VENCOL Front Template
+---
+
+## Overview
+
+The `BlogPost` interface defines the structure for blog articles throughout the VENCOL application. It supports both static blog data and WordPress API integration, providing all necessary fields for displaying blog content, excerpts, and metadata.
+
+## Type Definition
+
+```typescript
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  date: string;
+  image: string;
+  category: string;
+}
+```
+
+**Source:** `source/types.ts:8-17`
+
+## Properties
+
+<ParamField path="id" type="number" required>
+  Unique identifier for the blog post. Used for keys in React lists and database references.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The main headline of the blog post. Displayed in listings and on the detail page.
+</ParamField>
+
+<ParamField path="slug" type="string" required>
+  URL-friendly identifier used for routing (e.g., `"que-es-la-mioglobina"` becomes `/blog/que-es-la-mioglobina`).
+</ParamField>
+
+<ParamField path="excerpt" type="string" required>
+  Short summary or preview text of the blog post. Typically displayed in blog listing cards.
+</ParamField>
+
+<ParamField path="content" type="string" required>
+  The full HTML content of the blog post. Can contain rich text, images, and formatting.
+</ParamField>
+
+<ParamField path="date" type="string" required>
+  Publication date in human-readable format (e.g., `"Oct 24, 2023"` or `"24 oct. 2023"`).
+</ParamField>
+
+<ParamField path="image" type="string" required>
+  URL to the featured image for the blog post. Used as thumbnail in listings and hero image in detail view.
+</ParamField>
+
+<ParamField path="category" type="string" required>
+  Category or tag for content organization (e.g., `"Educativo"`, `"Tecnología"`, `"Medio Ambiente"`).
+</ParamField>
+
+## Usage Examples
+
+### Static Blog Posts
+
+Defining blog posts directly in the application data:
+
+```typescript
+import { BlogPost } from '../types';
+
+const posts: BlogPost[] = [
+  {
+    id: 1,
+    title: "¿Qué es la mioglobina?",
+    slug: "que-es-la-mioglobina",
+    excerpt: "El líquido rojo no es sangre, es agua con proteínas. Descubre cómo afecta la frescura y la percepción del cliente.",
+    content: "<p>El líquido rojo que vemos en las bandejas de carne <strong>no es sangre</strong>. Se trata de mioglobina...</p>",
+    date: "Oct 24, 2023",
+    image: "https://picsum.photos/id/431/400/250",
+    category: "Educativo"
+  },
+  {
+    id: 2,
+    title: "Innovación en Empaques",
+    slug: "innovacion-en-empaques",
+    excerpt: "Nuevas tecnologías Cryovac para extender la vida útil de productos cárnicos.",
+    content: "<p>La industria del empaque está en constante evolución...</p>",
+    date: "Nov 12, 2023",
+    image: "https://picsum.photos/id/225/400/250",
+    category: "Tecnología"
+  }
+];
+```
+
+**Source:** `source/data/data.tsx:410-461`
+
+### WordPress API Integration
+
+Mapping WordPress API responses to the `BlogPost` interface:
+
+```typescript
+import { BlogPost } from '../types';
+
+function mapWPPostToBlogPost(post: WPPost): BlogPost {
+  const featuredImage =
+    post._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+    'https://picsum.photos/400/250';
+
+  const category =
+    post._embedded?.['wp:term']?.[0]?.[0]?.name || 'General';
+
+  return {
+    id: post.id,
+    slug: post.slug,
+    title: stripHtml(post.title.rendered),
+    excerpt: stripHtml(post.excerpt.rendered),
+    content: post.content.rendered,
+    date: formatDate(post.date),
+    image: featuredImage,
+    category,
+  };
+}
+
+export async function fetchBlogPosts(perPage = 10): Promise<BlogPost[]> {
+  const res = await fetch(
+    `${WP_API_URL}/posts?per_page=${perPage}&_embed`
+  );
+  const posts: WPPost[] = await res.json();
+  return posts.map(mapWPPostToBlogPost);
+}
+```
+
+**Source:** `source/lib/wordpress.ts:33-80`
+
+### Rendering Blog Cards
+
+Using `BlogPost` data in components:
+
+```typescript
+interface BlogCardProps {
+  post: BlogPost;
+}
+
+const BlogCard: React.FC<BlogCardProps> = ({ post }) => (
+  <article className="glass-card p-6">
+    <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
+    <span className="text-brand-green text-sm">{post.category}</span>
+    <h3 className="text-xl font-bold mt-2">{post.title}</h3>
+    <p className="text-gray-400 mt-2">{post.excerpt}</p>
+    <time className="text-sm text-gray-500 mt-4 block">{post.date}</time>
+    <Link to={`/blog/${post.slug}`}>Read More</Link>
+  </article>
+);
+```
+
+## Related Types
+
+- **WPPage** - Similar structure for static pages from WordPress
+- **Service** - Another content type with similar fields for solutions
+
+## Validation Notes
+
+<Warning>
+  When integrating with WordPress API, ensure all HTML content in the `content` field is sanitized to prevent XSS vulnerabilities. The `excerpt` field should have HTML stripped for plain text display.
+</Warning>
+
+## Date Formatting
+
+The `date` field is stored as a formatted string rather than a Date object:
+
+```typescript
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+```
+
+**Source:** `source/lib/wordpress.ts:24-31`
+
+## SEO Considerations
+
+- The `slug` should be URL-safe and descriptive for SEO
+- The `excerpt` is ideal for meta descriptions
+- The `image` URL should be optimized and include alt text in implementation
+- The `title` becomes the page title in detail views

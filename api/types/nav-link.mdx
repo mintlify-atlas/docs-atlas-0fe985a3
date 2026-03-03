@@ -1,0 +1,118 @@
+---
+title: NavLink
+description: TypeScript interface for navigation menu links in the VENCOL Front Template
+---
+
+## Overview
+
+The `NavLink` interface represents a navigation link item used throughout the application's navigation components. It provides a simple structure for defining menu items with labels and routing paths.
+
+## Type Definition
+
+```typescript
+export interface NavLink {
+  label: string;
+  path: string;
+}
+```
+
+**Source:** `source/types.ts:3-6`
+
+## Properties
+
+<ParamField path="label" type="string" required>
+  The display text for the navigation link that appears in the UI.
+</ParamField>
+
+<ParamField path="path" type="string" required>
+  The route path for navigation. Should be a valid React Router path (e.g., `/`, `/nosotros`, `/blog`).
+</ParamField>
+
+## Usage Examples
+
+### Basic Navigation Links
+
+The most common usage of `NavLink` is in the site navigation configuration:
+
+```typescript
+import { NavLink } from '../types';
+
+const navigation: NavLink[] = [
+  { label: 'Inicio', path: '/' },
+  { label: 'Nosotros', path: '/nosotros' },
+  { label: 'Blog', path: '/blog' },
+];
+```
+
+**Source:** `source/data/data.tsx:44-49`
+
+### Usage in Navbar Component
+
+The `NavLink` interface is imported and used in the Navbar component to type the navigation links:
+
+```typescript
+import { NavLink } from '../types';
+import { siteContent } from '../data/data';
+
+const links = siteContent.navigation; // NavLink[]
+
+// Rendering navigation links
+{links.map((link) => (
+  <RouterNavLink
+    key={link.path}
+    to={link.path}
+    className={({ isActive }) => `
+      px-4 py-1.5 rounded-full text-md font-medium
+      ${isActive ? 'text-brand-green' : 'text-gray-300'}
+    `}
+  >
+    {link.label}
+  </RouterNavLink>
+))}
+```
+
+**Source:** `source/components/Navbar.tsx:4-64`
+
+## Related Types
+
+- **Service** - Contains more complex navigation data for solutions pages
+- **BlogPost** - Used for blog navigation and routing
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use meaningful labels">
+    Keep labels concise and descriptive. They should clearly indicate the page destination.
+    
+    ```typescript
+    // Good
+    { label: 'Contacto', path: '/contacto' }
+    
+    // Avoid
+    { label: 'Click Here', path: '/contacto' }
+    ```
+  </Accordion>
+
+  <Accordion title="Use consistent path format">
+    Always use absolute paths starting with `/` for consistency with React Router.
+    
+    ```typescript
+    // Good
+    { label: 'Blog', path: '/blog' }
+    
+    // Avoid
+    { label: 'Blog', path: 'blog' }
+    ```
+  </Accordion>
+
+  <Accordion title="Keep navigation arrays flat">
+    For dropdown menus or nested navigation, handle the logic in components rather than nesting NavLink structures.
+  </Accordion>
+</AccordionGroup>
+
+## TypeScript Notes
+
+- Both properties are required (no optional fields)
+- The interface is exported from `types.ts` for use throughout the application
+- Can be used in arrays for multiple navigation items
+- Compatible with React Router's `NavLink` and `Link` components

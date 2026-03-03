@@ -1,0 +1,268 @@
+---
+title: Service
+description: TypeScript interface for service/solution products in the VENCOL Front Template
+---
+
+## Overview
+
+The `Service` interface represents a product or service offering in the VENCOL catalog. It provides comprehensive data for displaying solutions in both listing and detail views, including descriptions, features, images, and icons.
+
+## Type Definition
+
+```typescript
+import { LucideIcon } from "lucide-react";
+
+export interface Service {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  subtitle1: string;
+  subtitle1Description: string;
+  subtitle2: string;
+  subtitle2Description: string;
+  icon: LucideIcon;
+  features: string[];
+  images: string[];
+  menuTitle: string;
+}
+```
+
+**Source:** `source/types.ts:19-33`
+
+## Properties
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the service. Used for React keys and data lookups.
+</ParamField>
+
+<ParamField path="slug" type="string" required>
+  URL-friendly identifier for routing (e.g., `"bolsas-termoencogibles-cryovac"` becomes `/soluciones/bolsas-termoencogibles-cryovac`).
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Full display title of the service shown in detail pages and cards.
+</ParamField>
+
+<ParamField path="description" type="string" required>
+  Short description displayed in listing cards and previews. Keep concise (1-2 sentences).
+</ParamField>
+
+<ParamField path="longDescription" type="string" required>
+  Extended description with detailed information about the service, displayed on the detail page.
+</ParamField>
+
+<ParamField path="subtitle1" type="string" required>
+  First section subtitle in the detail view for organizing content into themed sections.
+</ParamField>
+
+<ParamField path="subtitle1Description" type="string" required>
+  Content for the first subtitle section, providing detailed information about that aspect.
+</ParamField>
+
+<ParamField path="subtitle2" type="string" required>
+  Second section subtitle in the detail view for additional content organization.
+</ParamField>
+
+<ParamField path="subtitle2Description" type="string" required>
+  Content for the second subtitle section with complementary information.
+</ParamField>
+
+<ParamField path="icon" type="LucideIcon" required>
+  React component reference from `lucide-react` library. Used for visual representation in cards and menus.
+  
+  Common icons: `Package`, `Layers`, `Droplets`, `Tag`, `PenTool`
+</ParamField>
+
+<ParamField path="features" type="string[]" required>
+  Array of key features or benefits. Each string represents one bullet point.
+</ParamField>
+
+<ParamField path="images" type="string[]" required>
+  Array of image URLs for the service. First image typically used as hero, others in gallery.
+</ParamField>
+
+<ParamField path="menuTitle" type="string" required>
+  Shortened title for dropdown menus and navigation where space is limited.
+</ParamField>
+
+## Usage Examples
+
+### Complete Service Definition
+
+Here's a real example of a service object from the VENCOL application:
+
+```typescript
+import { Package } from 'lucide-react';
+import { Service } from '../types';
+
+const service: Service = {
+  id: '1',
+  slug: 'bolsas-termoencogibles-cryovac',
+  title: "Bolsas/fundas termoencogibles Cryovac",
+  menuTitle: "Bolsas/fundas termoencogibles",
+  description: "Seguridad alimentaria de alto rendimiento. Barrera superior contra oxígeno y humedad.",
+  longDescription: "Las bolsas termoencogibles Cryovac representan el estándar de oro en la industria del empaque de proteínas. Diseñadas con tecnología multicapa patentada, estas bolsas se encogen al contacto con el calor para ajustarse como una segunda piel al producto, eliminando el oxígeno residual y maximizando la vida útil.",
+  subtitle1: "Barrera superior contra oxígeno y humedad.",
+  subtitle1Description: "Nuestras soluciones de empaque te brindan una barrera técnica superior contra el oxígeno y la humedad. Esta protección avanzada previene la contaminación y extiende la vida útil de tus productos.",
+  subtitle2: "Innovación para tu Conservación y Calidad.",
+  subtitle2Description: "Diseñadas para una amplia gama de alimentos, estas bolsas aseguran la integridad de tus productos en cada etapa. Su tecnología te permite llevar sabor, textura y estándares de calidad intactos hasta las manos de tu consumidor final.",
+  icon: Package,
+  features: [
+    "Alta barrera al oxígeno para prevenir la oxidación.",
+    "Encogimiento superior para una presentación sin arrugas.",
+    "Resistencia extrema a la punción y al abuso en transporte.",
+    "Compatibles con sistemas de vacío rotativos y de cámara.",
+    "Disponibles en múltiples calibres según el tipo de hueso o corte."
+  ],
+  images: [
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-1-scaled.png",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/Productos-Cryovac.webp"
+  ]
+};
+```
+
+**Source:** `source/data/data.tsx:276-299`
+
+### Service Array for Solutions Catalog
+
+```typescript
+import { Package, Layers, Droplets, Tag, PenTool } from 'lucide-react';
+import { Service } from '../types';
+
+export const solutionsData: Service[] = [
+  {
+    id: '1',
+    slug: 'bolsas-termoencogibles-cryovac',
+    title: "Bolsas Termoencogibles Cryovac",
+    menuTitle: "Bolsas/fundas termoencogibles",
+    icon: Package,
+    // ... other fields
+  },
+  {
+    id: '2',
+    slug: 'film-termoformado',
+    title: "Film de Empaque Termoformado",
+    menuTitle: "Film de Empaque Termoformado",
+    icon: Layers,
+    // ... other fields
+  },
+  {
+    id: '3',
+    slug: 'absorbentes-tipo-almohadilla',
+    title: "Absorbentes Tipo Almohadilla",
+    menuTitle: "Absorbentes Tipo Almohadilla",
+    icon: Droplets,
+    // ... other fields
+  }
+];
+```
+
+**Source:** `source/data/solutions.tsx:4-85`
+
+### Rendering Service in Dropdown Menu
+
+```typescript
+import { Link } from 'react-router-dom';
+import { Service } from '../types';
+
+interface ServiceDropdownProps {
+  services: Service[];
+}
+
+const ServiceDropdown: React.FC<ServiceDropdownProps> = ({ services }) => (
+  <div className="dropdown">
+    {services.map((solution) => (
+      <Link 
+        key={solution.id}
+        to={`/soluciones/${solution.slug}`}
+        className="dropdown-item"
+      >
+        <div className="font-semibold">{solution.title}</div>
+        <div className="text-xs truncate">{solution.description}</div>
+      </Link>
+    ))}
+  </div>
+);
+```
+
+**Source:** `source/components/Navbar.tsx:78-87`
+
+### Using Icon Component
+
+```typescript
+import { Service } from '../types';
+
+interface ServiceCardProps {
+  service: Service;
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
+  const IconComponent = service.icon;
+  
+  return (
+    <div className="card">
+      <IconComponent className="w-12 h-12 text-brand-green" />
+      <h3>{service.title}</h3>
+      <p>{service.description}</p>
+    </div>
+  );
+};
+```
+
+## Icon Reference
+
+Common Lucide icons used in the VENCOL services:
+
+- **Package** - Bolsas termoencogibles
+- **Layers** - Film de empaque termoformado  
+- **Droplets** - Absorbentes tipo almohadilla
+- **Tag** - Foils para etiquetas
+- **PenTool** - Foils de marcación
+
+Import from `lucide-react`:
+```typescript
+import { Package, Layers, Droplets, Tag, PenTool } from 'lucide-react';
+```
+
+## Content Strategy
+
+<AccordionGroup>
+  <Accordion title="Description vs Long Description">
+    - **description**: 1-2 sentences, focusing on key benefits (shown in cards)
+    - **longDescription**: 2-3 paragraphs with technical details and use cases (shown on detail page)
+  </Accordion>
+
+  <Accordion title="Organizing Subtitles">
+    Use subtitle sections to break down complex product information:
+    - **subtitle1**: Often focuses on technical capabilities
+    - **subtitle2**: Often focuses on business benefits or applications
+  </Accordion>
+
+  <Accordion title="Feature Best Practices">
+    - Keep each feature to one line if possible
+    - Lead with benefit, follow with technical detail
+    - Use 4-6 features for optimal readability
+    - Format consistently (e.g., all start with action verbs)
+  </Accordion>
+
+  <Accordion title="Image Guidelines">
+    - First image in array is typically the hero/primary image
+    - Include 2-4 images total
+    - Use high-quality product photography
+    - Ensure images are web-optimized (WebP format recommended)
+  </Accordion>
+</AccordionGroup>
+
+## Related Types
+
+- **NavLink** - Used for simple navigation items
+- **BlogPost** - Similar content structure for blog articles
+
+## TypeScript Notes
+
+- All fields are required (no optional properties)
+- The `icon` property requires a React component type from `lucide-react`
+- Arrays (`features`, `images`) can be empty but should be defined
+- The `LucideIcon` type is imported from `"lucide-react"`

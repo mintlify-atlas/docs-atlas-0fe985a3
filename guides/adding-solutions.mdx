@@ -1,0 +1,281 @@
+---
+title: Adding Solutions
+description: Step-by-step guide to add new products and solutions to your VENCOL Front Template catalog
+---
+
+This guide walks you through adding new solutions (products/services) to the solutions catalog displayed on your site.
+
+## Overview
+
+Solutions are defined in `data/solutions.tsx` and automatically appear in:
+- Solutions dropdown menu in navigation
+- Solutions listing page
+- Individual solution detail pages
+
+## Solution Data Structure
+
+Each solution follows the `Service` interface defined in `types.ts`:
+
+```tsx types.ts
+export interface Service {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;          // Short description for cards
+  longDescription: string;       // Full description for detail page
+  subtitle1: string;
+  subtitle1Description: string;
+  subtitle2: string;
+  subtitle2Description: string;
+  icon: LucideIcon;
+  features: string[];
+  images: string[];
+  menuTitle: string;
+}
+```
+
+## Step-by-Step: Adding a New Solution
+
+<Steps>
+  <Step title="Open data/solutions.tsx">
+    This file contains the `solutionsData` array with all solutions
+  </Step>
+  
+  <Step title="Import an icon from Lucide">
+    Choose an appropriate icon from [Lucide React](https://lucide.dev):
+    
+    ```tsx data/solutions.tsx
+    import { Package, Layers, Droplets, Tag, PenTool, Truck } from 'lucide-react';
+    ```
+  </Step>
+  
+  <Step title="Add your solution object to the array">
+    Copy an existing solution and modify it:
+    
+    ```tsx data/solutions.tsx
+    export const solutionsData: Service[] = [
+      // ... existing solutions
+      {
+        id: '6',
+        slug: 'empaques-biodegradables',
+        title: "Empaques Biodegradables Ecológicos",
+        description: "Sostenibilidad certificada. Protección premium con mínimo impacto ambiental.",
+        longDescription: "Nuestros empaques biodegradables representan el futuro del packaging sostenible. Fabricados con materiales certificados compostables, ofrecen la misma protección que los empaques tradicionales mientras se descomponen naturalmente en 90-180 días. Ideales para marcas comprometidas con la sostenibilidad y cumplimiento de normativas ambientales.",
+        icon: Package,
+        features: [
+          "Certificación compostable EN 13432 y ASTM D6400",
+          "Biodegradación completa en 90-180 días",
+          "Barrera efectiva contra humedad y oxígeno",
+          "Compatibles con sistemas de empaque existentes",
+          "Reducción de huella de carbono hasta 60%"
+        ],
+        image: "https://images.unsplash.com/photo-..."
+      }
+    ];
+    ```
+  </Step>
+  
+  <Step title="Update data/data.tsx for detailed pages">
+    If you want detailed solution pages with subtitles and multiple images, also add to `siteContent.solutions.items`:
+    
+    ```tsx data/data.tsx
+    solutions: {
+      items: [
+        // ... existing items
+        {
+          id: '6',
+          slug: 'empaques-biodegradables',
+          title: "Empaques Biodegradables Ecológicos",
+          menuTitle: "Empaques Biodegradables",
+          description: "Sostenibilidad certificada...",
+          longDescription: "Nuestros empaques biodegradables...",
+          subtitle1: "Compromiso con el medio ambiente",
+          subtitle1Description: "Reducimos el impacto ambiental...",
+          subtitle2: "Rendimiento sin compromisos",
+          subtitle2Description: "La sostenibilidad no significa...",
+          icon: Package,
+          features: [
+            "Certificación compostable EN 13432",
+            "Biodegradación completa en 90-180 días",
+            "Barrera efectiva contra humedad y oxígeno"
+          ],
+          images: [
+            "https://cms.gobigagency.co/vencol/...",
+            "https://cms.gobigagency.co/vencol/..."
+          ]
+        } as Service
+      ]
+    }
+    ```
+  </Step>
+</Steps>
+
+## Field Descriptions
+
+### Required Fields
+
+| Field | Description | Example |
+|-------|-------------|----------|
+| `id` | Unique identifier (string) | `"6"` |
+| `slug` | URL-friendly identifier | `"empaques-biodegradables"` |
+| `title` | Full display title | `"Empaques Biodegradables Ecológicos"` |
+| `menuTitle` | Shorter title for navigation | `"Empaques Biodegradables"` |
+| `description` | Short summary (1-2 sentences) | Used in cards and previews |
+| `longDescription` | Full description (2-3 paragraphs) | Used on detail pages |
+| `icon` | Lucide React icon component | `Package` |
+| `features` | Array of key features/benefits | 3-5 bullet points |
+| `images` | Array of image URLs | At least 1-3 images |
+
+### Detail Page Fields
+
+| Field | Description |
+|-------|-------------|
+| `subtitle1` | First section heading |
+| `subtitle1Description` | First section content |
+| `subtitle2` | Second section heading |
+| `subtitle2Description` | Second section content |
+
+<Note>
+  The `subtitle1` and `subtitle2` fields are only needed if you're adding the solution to `data.tsx` for detailed pages.
+</Note>
+
+## Example: Complete Solution
+
+Here's a complete example from the existing codebase:
+
+```tsx data/solutions.tsx
+{
+  id: '3',
+  slug: 'absorbentes-tipo-almohadilla',
+  title: "Absorbentes Tipo Almohadilla",
+  description: "Frescura máxima y presentación impecable. Optimizan la conservación y evitan derrames.",
+  longDescription: "Las almohadillas absorbentes Vencol (representando a Novipax) son esenciales para el control de líquidos (mioglobina) en bandejas de autoservicio. No solo mejoran la estética evitando el aspecto 'sangriento', sino que reducen la carga bacteriana al atrapar la humedad libre donde proliferan los microorganismos. Disponibles en diversas capacidades de absorción y colores para integrarse con el empaque.",
+  icon: Droplets,
+  features: [
+    "Núcleo de celulosa virgen y polímeros superabsorbentes.",
+    "Retención de líquido bajo presión (el líquido no regresa).",
+    "Variedad de colores (Blanco, Negro, Rojo) para branding.",
+    "Disponibles en formatos precortados o en rollo.",
+    "Certificación FDA para contacto directo con alimentos."
+  ],
+  image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1200"
+}
+```
+
+## Choosing the Right Icon
+
+<CodeGroup>
+
+```tsx Package & Shipping
+import { Package, Truck, Box, Container } from 'lucide-react';
+```
+
+```tsx Materials & Layers
+import { Layers, Droplets, Tag, Sheet } from 'lucide-react';
+```
+
+```tsx Marking & Printing
+import { PenTool, Printer, Barcode, QrCode } from 'lucide-react';
+```
+
+```tsx Quality & Safety
+import { Shield, CheckCircle, Award, Leaf } from 'lucide-react';
+```
+
+</CodeGroup>
+
+## Testing Your New Solution
+
+<Steps>
+  <Step title="Save your changes">
+    Ensure both `data/solutions.tsx` and `data/data.tsx` are saved
+  </Step>
+  
+  <Step title="Start development server">
+    ```bash
+    npm run dev
+    ```
+  </Step>
+  
+  <Step title="Check navigation menu">
+    Your new solution should appear in the "Soluciones" dropdown
+  </Step>
+  
+  <Step title="Test the detail page">
+    Navigate to `/soluciones/your-slug` to see the full page
+  </Step>
+</Steps>
+
+## Image Guidelines
+
+<Warning>
+  Use high-quality images (1200px width minimum) and optimize them before uploading. WebP format is recommended for best performance.
+</Warning>
+
+### Image Requirements
+
+- **Format**: WebP, JPG, or PNG
+- **Dimensions**: Minimum 1200x800px
+- **Size**: Under 200KB after optimization
+- **Hosting**: Use a CDN for better performance
+
+### Where to Host Images
+
+1. **WordPress Media Library** (if using WordPress CMS)
+   ```
+   https://cms.gobigagency.co/vencol/wp-content/uploads/...
+   ```
+
+2. **Unsplash** (for placeholder/demo images)
+   ```
+   https://images.unsplash.com/photo-...?auto=format&fit=crop&q=80&w=1200
+   ```
+
+3. **Your own CDN** (recommended for production)
+
+## Writing Effective Descriptions
+
+### Short Description (Card View)
+- Keep it under 20 words
+- Focus on the key benefit
+- Use action-oriented language
+
+**Good**: "Barrera superior contra oxígeno. Extiende vida útil hasta 40%."
+
+**Bad**: "Este es un producto muy bueno que tiene muchas características interesantes."
+
+### Long Description (Detail Page)
+- 2-3 paragraphs
+- Start with the main value proposition
+- Include technical details
+- Mention certifications or standards
+- End with use cases or applications
+
+### Features List
+- 3-5 bullet points
+- Lead with benefits, not just features
+- Use specific numbers when possible
+- Include certifications (FDA, ASTM, etc.)
+
+**Good**: "Biodegradación completa en 90-180 días"
+
+**Bad**: "Es biodegradable"
+
+## Common Mistakes to Avoid
+
+<Warning>
+  - Don't forget to add the icon import at the top of the file
+  - Don't use duplicate `id` or `slug` values
+  - Don't use relative image paths (always use full URLs)
+  - Don't skip the `menuTitle` field (it's used in navigation)
+</Warning>
+
+## Next Steps
+
+After adding your solution:
+
+1. Test the solution detail page thoroughly
+2. Check mobile responsiveness
+3. Verify all images load correctly
+4. Update your sitemap if using one
+5. [Deploy your changes](/guides/deployment) to production

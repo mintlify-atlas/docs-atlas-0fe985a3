@@ -1,0 +1,176 @@
+---
+title: Navbar Component
+description: Responsive navigation component with dropdown menus and scroll effects
+---
+
+The `Navbar` component provides a fixed, responsive navigation bar with glassmorphism effects, dropdown menus, and mobile support.
+
+## Features
+
+- Fixed positioning with scroll-based background changes
+- Centered desktop menu with glassmorphism pill design
+- Dynamic dropdown menu for solutions/services
+- Mobile hamburger menu with slide-down panel
+- Active route highlighting
+- Auto-close on route change
+
+## Usage
+
+```tsx
+import { Navbar } from '../components/Navbar';
+
+function App() {
+  return (
+    <div>
+      <Navbar />
+      {/* Your page content */}
+    </div>
+  );
+}
+```
+
+## Component Props
+
+The Navbar component does not accept any props. It's a self-contained component that reads navigation data from `siteContent.navigation`.
+
+## State Management
+
+The component manages several internal state variables:
+
+<ParamField path="isOpen" type="boolean" default="false">
+  Controls the mobile menu visibility
+</ParamField>
+
+<ParamField path="scrolled" type="boolean" default="false">
+  Tracks whether the user has scrolled past 20px, triggering background changes
+</ParamField>
+
+<ParamField path="mobileSolutionsOpen" type="boolean" default="false">
+  Controls the mobile solutions dropdown visibility
+</ParamField>
+
+## Data Structure
+
+The Navbar reads navigation links from `siteContent.navigation`, which should be an array of `NavLink` objects:
+
+```typescript
+interface NavLink {
+  label: string;  // Display text for the link
+  path: string;   // Router path
+}
+```
+
+## Key Features
+
+### Scroll Effect
+
+The navbar changes appearance when scrolled:
+
+```tsx
+useEffect(() => {
+  const handleScroll = () => {
+    setScrolled(window.scrollY > 20);
+  };
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
+```
+
+When `scrolled` is true:
+- Applies `glass-panel` class with blur effect
+- Adds bottom border
+- Reduces vertical padding
+
+### Desktop Menu Layout
+
+The desktop menu is absolutely centered using:
+
+```tsx
+className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
+```
+
+### Solutions Dropdown
+
+A special dropdown menu is injected after the "Nosotros" link:
+
+- Hover-triggered on desktop
+- Click-triggered on mobile
+- Displays solution items from `siteContent.solutions.items`
+- Links to `/soluciones/{slug}` paths
+
+### Active Link Styling
+
+Links use React Router's `NavLink` with active state detection:
+
+```tsx
+className={({ isActive }) => `
+  px-4 py-1.5 rounded-full text-md font-medium transition-all duration-300
+  ${isActive 
+    ? 'text-brand-green bg-white/10 shadow-[0_0_10px_rgba(74,222,128,0.1)]' 
+    : 'text-gray-300 hover:text-white hover:bg-white/5'}
+`}
+```
+
+## Mobile Menu
+
+The mobile menu:
+
+- Appears below `md` breakpoint
+- Slides down with smooth height transition
+- Auto-closes on route change via `useEffect`
+- Includes expandable solutions submenu
+
+```tsx
+useEffect(() => {
+  setIsOpen(false);
+  setMobileSolutionsOpen(false);
+}, [location]);
+```
+
+## Styling Classes
+
+Key CSS classes used:
+
+- `glass-panel`: Semi-transparent background with backdrop blur
+- `glass-button`: Button with glass effect
+- `brand-green`: Primary green accent color
+- `border-white/5`: Subtle white border with 5% opacity
+
+## Integration with Site Content
+
+The component integrates with the centralized `siteContent` data:
+
+- `siteContent.navigation`: Main navigation links
+- `siteContent.header.logo`: Logo image
+- `siteContent.header.cta`: Call-to-action button config
+- `siteContent.solutions.items`: Dropdown menu items
+
+## Example Navigation Data
+
+```typescript
+const siteContent = {
+  navigation: [
+    { label: 'Inicio', path: '/' },
+    { label: 'Nosotros', path: '/nosotros' },
+    { label: 'Blog', path: '/blog' },
+    { label: 'Contacto', path: '/contacto' }
+  ],
+  header: {
+    logo: '/logo.png',
+    cta: {
+      label: 'Contáctanos',
+      path: '/contacto'
+    }
+  },
+  solutions: {
+    items: [
+      { id: 1, slug: 'solution-1', title: 'Solution 1', menuTitle: 'Solution 1', description: '...' },
+      // More solutions...
+    ]
+  }
+};
+```
+
+## Component Location
+
+`components/Navbar.tsx:10`

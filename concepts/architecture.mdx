@@ -1,0 +1,289 @@
+---
+title: Architecture Overview
+description: Understanding the project structure, component organization, and data flow in the VENCOL Front Template
+---
+
+## Project Structure
+
+The VENCOL Front Template is a modern React + TypeScript application built with Vite. The project follows a well-organized structure that separates concerns and promotes maintainability.
+
+### Directory Layout
+
+```
+source/
+├── components/          # Reusable UI components
+│   ├── ui/             # Base UI components (GlassCard, BackgroundBlobs)
+│   ├── Navbar.tsx      # Main navigation component
+│   ├── Footer.tsx      # Site footer
+│   └── SEO.tsx         # SEO meta tags component
+├── pages/              # Route-level page components
+│   ├── Home.tsx
+│   ├── About.tsx
+│   ├── Blog.tsx
+│   ├── BlogDetail.tsx
+│   ├── Contact.tsx
+│   ├── SolutionDetail.tsx
+│   └── PageDetail.tsx  # Dynamic WordPress pages
+├── data/               # Static data and content
+│   ├── data.tsx
+│   └── solutions.tsx
+├── lib/                # Utility libraries
+│   └── wordpress.ts    # WordPress API integration
+├── App.tsx             # Main application component
+├── types.ts            # TypeScript type definitions
+└── index.tsx           # Application entry point
+```
+
+## Component Architecture
+
+### Component Hierarchy
+
+The application follows a hierarchical component structure:
+
+```tsx
+App (Router)
+├── BackgroundBlobs (Global visual effects)
+├── Navbar (Fixed navigation)
+├── Routes
+│   ├── Home
+│   ├── About
+│   ├── Blog
+│   ├── BlogDetail
+│   ├── Contact
+│   ├── SolutionDetail
+│   └── PageDetail (WordPress catch-all)
+└── Footer
+```
+
+### Main App Component
+
+The App component sets up the routing structure and global layout:
+
+```tsx App.tsx
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { BackgroundBlobs } from './components/ui/BackgroundBlobs';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function App() {
+  return (
+    <Router>
+      <ScrollToTop />
+      <div className="min-h-screen bg-brand-dark font-sans text-gray-100 selection:bg-brand-green selection:text-brand-dark">
+        <BackgroundBlobs />
+        <Navbar />
+        <main className="flex-grow">
+          <Routes>
+            {/* Routes defined here */}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+```
+
+## Data Flow
+
+### Static Content
+
+Static content is centralized in the `data/` directory:
+
+- **data.tsx**: Contains all site content (navigation, hero sections, testimonials, etc.)
+- **solutions.tsx**: Service/solution data with icons and descriptions
+
+This approach provides:
+- Easy content updates without touching components
+- Type safety for content structure
+- Single source of truth for site data
+
+### Dynamic Content (WordPress)
+
+The application integrates with WordPress for dynamic content:
+
+1. **Blog posts** are fetched from WordPress REST API
+2. **Custom pages** are loaded dynamically via slug
+3. **Fallback data** is used when WordPress is unavailable
+
+```tsx
+import { fetchBlogPosts } from '../lib/wordpress';
+
+useEffect(() => {
+  fetchBlogPosts()
+    .then((wpPosts) => {
+      if (wpPosts.length > 0) setBlogPosts(wpPosts);
+    })
+    .catch((err) => console.warn('WP fetch failed, using fallback:', err));
+}, []);
+```
+
+### State Management
+
+The application uses React's built-in state management:
+
+- **Component State**: Local UI state with `useState`
+- **Side Effects**: Data fetching and DOM manipulation with `useEffect`
+- **URL Parameters**: Route parameters with React Router's `useParams`
+- **Navigation**: Location tracking with `useLocation`
+
+<Note>
+  No external state management library is needed. The application architecture keeps state localized to components where it's used.
+</Note>
+
+## Type System
+
+### Core Types
+
+The `types.ts` file defines the application's data contracts:
+
+```tsx types.ts
+export interface NavLink {
+  label: string;
+  path: string;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  date: string;
+  image: string;
+  category: string;
+}
+
+export interface Service {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  subtitle1: string;
+  subtitle1Description: string;
+  subtitle2: string;
+  subtitle2Description: string;
+  icon: LucideIcon;
+  features: string[];
+  images: string[];
+  menuTitle: string;
+}
+
+export interface WPPage {
+  id: number;
+  slug: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  date: string;
+  image: string;
+}
+```
+
+## Component Patterns
+
+### Reusable UI Components
+
+The `components/ui/` directory contains reusable components:
+
+**GlassCard**: A glassmorphism-styled container
+```tsx
+<GlassCard hoverEffect className="p-6">
+  <h3>Card Content</h3>
+</GlassCard>
+```
+
+**BackgroundBlobs**: Animated background effects
+```tsx
+<BackgroundBlobs />
+```
+
+### Page Components
+
+Each page component follows this pattern:
+
+1. Import dependencies and types
+2. Define component with proper TypeScript types
+3. Manage local state
+4. Fetch data (if needed)
+5. Render SEO component
+6. Render page content
+
+```tsx
+export const Home: React.FC = () => {
+  const { home, meta } = siteContent;
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+
+  useEffect(() => {
+    // Fetch WordPress posts
+  }, []);
+
+  return (
+    <div className="relative z-10">
+      <SEO title={home.meta.title} description={home.meta.description} />
+      {/* Page content */}
+    </div>
+  );
+};
+```
+
+## Build and Deployment
+
+The application uses Vite for building:
+
+- **Development**: Fast HMR with `vite`
+- **Production**: Optimized bundle with `vite build`
+- **Preview**: Test production build with `vite preview`
+
+<Card title="Deployment" icon="rocket">
+  The project is configured for Vercel deployment with `vercel.json`. Build output is optimized for modern browsers with ESM imports.
+</Card>
+
+## Performance Considerations
+
+### Code Splitting
+
+React Router automatically code-splits by route, loading only the necessary components for each page.
+
+### Image Optimization
+
+Images are loaded from external sources (WordPress, CDN) and use proper alt text and lazy loading where applicable.
+
+### API Caching
+
+WordPress data is fetched on component mount and cached in component state, with fallback data for offline scenarios.
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Component Organization">
+    - Keep components focused on a single responsibility
+    - Use TypeScript interfaces for all props
+    - Separate UI components from page components
+    - Centralize static content in `data/` directory
+  </Accordion>
+  
+  <Accordion title="Type Safety">
+    - Define interfaces for all data structures
+    - Use proper React.FC types for components
+    - Avoid `any` types
+    - Leverage TypeScript's type inference
+  </Accordion>
+  
+  <Accordion title="State Management">
+    - Keep state as local as possible
+    - Use hooks for side effects
+    - Implement proper loading and error states
+    - Provide fallback data for external APIs
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,651 @@
+---
+title: "Installation Guide"
+description: "Complete installation instructions for VENCOL Front Template. Covers npm, pnpm, and yarn setups, environment configuration, and production deployment."
+---
+
+# Installation Guide
+
+This comprehensive guide covers everything you need to install, configure, and deploy the VENCOL Front Template application. Whether you're setting up a development environment or preparing for production deployment, this guide has you covered.
+
+## System Requirements
+
+Before installing, ensure your system meets these requirements:
+
+- **Node.js**: Version 16.x or higher (18.x recommended)
+- **Package Manager**: npm 7+, pnpm 7+, or yarn 1.22+
+- **Operating System**: Windows, macOS, or Linux
+- **Memory**: 2GB RAM minimum, 4GB recommended
+- **Disk Space**: 500MB for dependencies
+
+<Note>
+  For the best development experience, we recommend **Node.js 18.x** or **20.x LTS** with **pnpm** as the package manager.
+</Note>
+
+## Installation Methods
+
+### Option 1: Using npm (Default)
+
+<Steps>
+  <Step title="Install Dependencies">
+    Navigate to your project directory and install all required packages:
+    
+    ```bash
+    cd vencol-front-template
+    npm install
+    ```
+    
+    This installs all dependencies from `package.json`:
+    - **react** (18.3.1) - Core React library
+    - **react-dom** (18.3.1) - React rendering
+    - **react-router-dom** (6.22.3) - Client-side routing
+    - **lucide-react** (0.358.0) - Icon library
+    - **react-helmet-async** (2.0.4) - SEO meta tags
+    - **@vitejs/plugin-react** (5.0.0) - Vite React plugin
+    - **typescript** (5.8.2) - TypeScript compiler
+    - **vite** (6.2.0) - Build tool and dev server
+  </Step>
+
+  <Step title="Verify Installation">
+    Confirm all packages installed correctly:
+    
+    ```bash
+    npm list --depth=0
+    ```
+    
+    You should see all packages listed without errors.
+  </Step>
+
+  <Step title="Start Development Server">
+    Run the development server:
+    
+    ```bash
+    npm run dev
+    ```
+    
+    The server starts on `http://localhost:3000` (configured in `vite.config.ts:9`).
+  </Step>
+</Steps>
+
+### Option 2: Using pnpm (Recommended)
+
+pnpm is faster and more disk-efficient than npm. The project includes a `pnpm-lock.yaml:1-39052` lockfile.
+
+<Steps>
+  <Step title="Install pnpm">
+    If you don't have pnpm installed, install it globally:
+    
+    ```bash
+    npm install -g pnpm
+    ```
+    
+    Or use Corepack (Node.js 16.13+):
+    
+    ```bash
+    corepack enable
+    corepack prepare pnpm@latest --activate
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install project dependencies with pnpm:
+    
+    ```bash
+    pnpm install
+    ```
+    
+    pnpm uses the existing `pnpm-lock.yaml` for deterministic installations.
+  </Step>
+
+  <Step title="Start Development Server">
+    Launch the dev server:
+    
+    ```bash
+    pnpm run dev
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  **Why pnpm?** It uses a content-addressable store, saving disk space and installation time. Perfect for monorepos and large projects.
+</Tip>
+
+### Option 3: Using Yarn
+
+<Steps>
+  <Step title="Install Yarn">
+    If you don't have Yarn installed:
+    
+    ```bash
+    npm install -g yarn
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all packages:
+    
+    ```bash
+    yarn install
+    ```
+    
+    Yarn will generate a `yarn.lock` file for dependency resolution.
+  </Step>
+
+  <Step title="Start Development Server">
+    Run the dev server:
+    
+    ```bash
+    yarn dev
+    ```
+  </Step>
+</Steps>
+
+## Environment Configuration
+
+The application supports environment variables for API configuration.
+
+### Creating Environment File
+
+Create a `.env` file in the project root:
+
+```bash .env
+# Gemini API Key (if using AI features)
+GEMINI_API_KEY=your_api_key_here
+
+# WordPress API URL (optional override)
+WP_API_URL=https://cms.gobigagency.co/vencol/wp-json/wp/v2
+
+# Development
+NODE_ENV=development
+```
+
+<Warning>
+  Never commit `.env` files to version control. The `.gitignore` should include `.env` to prevent accidental commits.
+</Warning>
+
+### Environment Variables in Vite
+
+Vite exposes environment variables through `vite.config.ts:13-16`:
+
+```typescript vite.config.ts
+define: {
+  'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+  'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+}
+```
+
+Access them in your code:
+
+```typescript
+const apiKey = process.env.GEMINI_API_KEY;
+```
+
+## TypeScript Configuration
+
+The project uses TypeScript 5.8.2 with strict type checking. The `tsconfig.json` includes:
+
+```json tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+**Key configurations:**
+- **strict**: Enables all strict type-checking options
+- **jsx**: Uses React 17+ JSX transform
+- **moduleResolution**: Bundler mode for Vite compatibility
+
+## Vite Configuration Deep Dive
+
+The `vite.config.ts:5-23` provides advanced configuration:
+
+```typescript vite.config.ts
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, '.', '');
+  return {
+    server: {
+      port: 3000,
+      host: '0.0.0.0',
+    },
+    plugins: [react()],
+    define: {
+      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+    },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '.'),
+      }
+    }
+  };
+});
+```
+
+### Configuration Options Explained
+
+- **port: 3000** - Custom development port (default is 5173)
+- **host: '0.0.0.0'** - Allows network access (useful for mobile testing)
+- **plugins: [react()]** - Enables React Fast Refresh and JSX
+- **define** - Injects environment variables at build time
+- **alias** - Path alias `@` for cleaner imports
+
+### Customizing the Port
+
+To change the development port, edit `vite.config.ts:9`:
+
+```typescript
+server: {
+  port: 8080, // Your custom port
+  host: '0.0.0.0',
+}
+```
+
+## WordPress API Setup
+
+The application integrates with WordPress for blog content via `lib/wordpress.ts:3`:
+
+```typescript lib/wordpress.ts
+const WP_API_URL = 'https://cms.gobigagency.co/vencol/wp-json/wp/v2';
+```
+
+### WordPress API Functions
+
+Two main functions handle WordPress integration:
+
+#### Fetch Blog Posts
+
+```typescript lib/wordpress.ts
+export async function fetchBlogPosts(perPage = 10): Promise<BlogPost[]> {
+  const res = await fetch(
+    `${WP_API_URL}/posts?per_page=${perPage}&_embed`
+  );
+
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+
+  const posts: WPPost[] = await res.json();
+  return posts.map(mapWPPostToBlogPost);
+}
+```
+
+#### Fetch Pages by Slug
+
+```typescript lib/wordpress.ts
+export async function fetchWPPageBySlug(slug: string): Promise<WPPage | null> {
+  const res = await fetch(
+    `${WP_API_URL}/pages?slug=${encodeURIComponent(slug)}&_embed`
+  );
+
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+
+  const pages: WPPost[] = await res.json();
+  if (pages.length === 0) return null;
+  return mapWPPageToWPPage(pages[0]);
+}
+```
+
+### Testing WordPress Connection
+
+Verify the WordPress API is accessible:
+
+```bash
+curl https://cms.gobigagency.co/vencol/wp-json/wp/v2/posts
+```
+
+If the API is unavailable, the app uses fallback content from `data/data.tsx`.
+
+## Production Build
+
+Build the application for production deployment.
+
+<Steps>
+  <Step title="Run Production Build">
+    Compile and optimize the application:
+    
+    <CodeGroup>
+    ```bash npm
+    npm run build
+    ```
+    
+    ```bash pnpm
+    pnpm run build
+    ```
+    
+    ```bash yarn
+    yarn build
+    ```
+    </CodeGroup>
+    
+    This creates an optimized build in the `dist/` directory.
+  </Step>
+
+  <Step title="Preview Production Build">
+    Test the production build locally:
+    
+    <CodeGroup>
+    ```bash npm
+    npm run preview
+    ```
+    
+    ```bash pnpm
+    pnpm run preview
+    ```
+    
+    ```bash yarn
+    yarn preview
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Verify Build Output">
+    Check the `dist/` directory contains:
+    
+    ```
+    dist/
+    ├── assets/
+    │   ├── index-[hash].js
+    │   ├── index-[hash].css
+    │   └── ...
+    ├── index.html
+    └── ...
+    ```
+  </Step>
+</Steps>
+
+### Build Optimization
+
+Vite automatically optimizes your production build:
+
+- **Code Splitting** - Automatic chunk splitting for better caching
+- **Tree Shaking** - Removes unused code
+- **Minification** - Compresses JavaScript and CSS
+- **Asset Optimization** - Optimizes images and fonts
+- **Source Maps** - Generated for debugging (can be disabled)
+
+## Deployment Options
+
+The project is configured for easy deployment to multiple platforms.
+
+### Vercel Deployment (Recommended)
+
+The project includes `vercel.json:1-80`:
+
+```json vercel.json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+}
+```
+
+<Steps>
+  <Step title="Install Vercel CLI">
+    ```bash
+    npm install -g vercel
+    ```
+  </Step>
+
+  <Step title="Deploy">
+    ```bash
+    vercel
+    ```
+    
+    Follow the prompts to link your project and deploy.
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Add environment variables in the Vercel dashboard:
+    - `GEMINI_API_KEY`
+    - Any other production variables
+  </Step>
+</Steps>
+
+### Netlify Deployment
+
+Create a `netlify.toml` in the project root:
+
+```toml netlify.toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+Deploy:
+
+```bash
+npm install -g netlify-cli
+netlify deploy --prod
+```
+
+### Manual Deployment
+
+For static hosting (Nginx, Apache, AWS S3, etc.):
+
+1. Build the project: `npm run build`
+2. Upload `dist/` folder contents to your server
+3. Configure server rewrites to `index.html` for SPA routing
+
+**Nginx Configuration:**
+
+```nginx
+server {
+  listen 80;
+  server_name your-domain.com;
+  root /path/to/dist;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}
+```
+
+## Post-Installation Checklist
+
+After installation, verify everything works:
+
+<Steps>
+  <Step title="Check Development Server">
+    ✓ Dev server runs on port 3000  
+    ✓ Hot Module Replacement works  
+    ✓ No console errors  
+  </Step>
+
+  <Step title="Verify WordPress Integration">
+    ✓ Blog posts load from WordPress  
+    ✓ Featured images display correctly  
+    ✓ Fallback content works if API fails  
+  </Step>
+
+  <Step title="Test Routing">
+    ✓ All routes navigate correctly  
+    ✓ Solution detail pages load  
+    ✓ Blog detail pages work  
+    ✓ 404 handling for unknown routes  
+  </Step>
+
+  <Step title="Validate SEO">
+    ✓ Meta tags render correctly  
+    ✓ Open Graph tags present  
+    ✓ Page titles update per route  
+  </Step>
+
+  <Step title="Production Build">
+    ✓ Build completes without errors  
+    ✓ Preview server runs correctly  
+    ✓ All assets load properly  
+  </Step>
+</Steps>
+
+## Troubleshooting Installation Issues
+
+<AccordionGroup>
+  <Accordion title="npm install fails with permission errors">
+    **On Linux/macOS:**
+    ```bash
+    sudo chown -R $USER ~/.npm
+    npm install
+    ```
+    
+    **Or use a Node version manager:**
+    ```bash
+    # Install nvm
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+    nvm install 18
+    nvm use 18
+    ```
+  </Accordion>
+
+  <Accordion title="TypeScript compilation errors">
+    Ensure TypeScript version matches `package.json:21`:
+    
+    ```bash
+    npm list typescript
+    # Should show ~5.8.2
+    ```
+    
+    Reinstall dependencies:
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+
+  <Accordion title="Vite build fails">
+    Clear Vite cache:
+    ```bash
+    rm -rf node_modules/.vite
+    npm run build
+    ```
+    
+    Check Node.js version:
+    ```bash
+    node --version
+    # Should be 16.x or higher
+    ```
+  </Accordion>
+
+  <Accordion title="Port 3000 already in use">
+    Find and kill the process:
+    ```bash
+    # macOS/Linux
+    lsof -ti:3000 | xargs kill -9
+    
+    # Windows
+    netstat -ano | findstr :3000
+    taskkill /PID <PID> /F
+    ```
+    
+    Or change the port in `vite.config.ts:9`.
+  </Accordion>
+
+  <Accordion title="WordPress API CORS errors">
+    The WordPress server must allow CORS from your domain. Contact your WordPress admin to add CORS headers:
+    
+    ```php
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Updating Dependencies
+
+Keep your dependencies up to date for security and features.
+
+### Check for Updates
+
+```bash
+npm outdated
+```
+
+### Update All Dependencies
+
+<CodeGroup>
+```bash npm
+npm update
+```
+
+```bash pnpm
+pnpm update
+```
+
+```bash yarn
+yarn upgrade
+```
+</CodeGroup>
+
+### Update to Latest Versions
+
+```bash
+npm install react@latest react-dom@latest
+npm install -D typescript@latest vite@latest
+```
+
+<Warning>
+  Always test thoroughly after major version updates. Check for breaking changes in package changelogs.
+</Warning>
+
+## Development Best Practices
+
+For optimal development experience:
+
+1. **Use TypeScript strictly** - Don't use `any` types
+2. **Follow component patterns** - See existing components in `components/`
+3. **Test WordPress integration** - Ensure fallbacks work
+4. **Optimize images** - Use appropriate formats and sizes
+5. **Keep dependencies updated** - Run `npm outdated` regularly
+6. **Use ESLint** (if configured) - Maintain code quality
+7. **Git commit regularly** - Track changes incrementally
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Start Development" icon="code" href="/quickstart">
+    Return to the Quickstart Guide to begin building features.
+  </Card>
+  
+  <Card title="Explore Architecture" icon="book" href="/introduction">
+    Learn about the project structure and design patterns.
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+- [Vite Documentation](https://vitejs.dev) - Build tool and dev server
+- [React Documentation](https://react.dev) - React 18 features
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript guide
+- [React Router](https://reactrouter.com) - Client-side routing
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS
+- [Lucide Icons](https://lucide.dev) - Icon library
+
+<Note>
+  Installation complete! Your VENCOL Front Template is ready for development. Start the dev server and begin customizing your application.
+</Note>

@@ -1,0 +1,538 @@
+---
+title: Contact Page Component
+description: Documentation for the Contact page component with form and company contact information.
+---
+
+# Contact Page Component
+
+The Contact page (`pages/Contact.tsx`) provides a contact form and displays company contact information across multiple locations.
+
+## Purpose
+
+The Contact page:
+
+- Provides a contact form for inquiries
+- Displays company contact information (email, phone, addresses)
+- Shows multiple office locations
+- Encourages customer communication
+- Maintains consistent branding with hero section
+
+## Data Sources
+
+### Static Content
+
+```typescript
+import { siteContent } from '../data/data';
+
+const { contact } = siteContent;
+```
+
+### Contact Data Structure
+
+```typescript
+contact: {
+  meta: {
+    title: string;
+    description: string;
+  },
+  hero: {
+    badge: string;
+    title: string;
+    description: string;
+    bgimage: string;
+  },
+  form: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    topic: string;
+    message: string;
+    submit: string;
+  },
+  infoSection: {
+    badge: string;
+    title: string;
+    description: string;
+  }
+}
+
+// Company contact info from brand section
+siteContent.brand.contact: {
+  email: string;
+  phone: string;
+  address: string;
+  locations: Array<{
+    country: string;
+    address: string;
+  }>;
+}
+```
+
+## Page Structure
+
+### 1. Hero Section
+
+Full-width header with background image:
+
+```typescript
+<div className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
+  <div className="absolute inset-0 z-0">
+    <img 
+      src={contact.hero.bgimage} 
+      alt="About Hero" 
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-brand-dark/80 backdrop-blur-[2px]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-dark" />
+  </div>
+
+  <div className="relative z-10 max-w-5xl mx-auto px-4 text-center mt-16">
+    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full">
+      <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse" />
+      <span>{contact.hero.badge}</span>
+    </div>
+    
+    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-8">
+      {contact.hero.title}
+    </h1>
+    
+    <p className="text-xl md:text-2xl text-glass-muted max-w-3xl mx-auto">
+      {contact.hero.description}
+    </p>
+  </div>
+</div>
+```
+
+**Location:** `pages/Contact.tsx:16-44`
+
+**Features:**
+- Background image with dark overlay
+- Gradient overlay for text readability
+- Animated badge indicator
+- Responsive text sizing
+
+### 2. Contact Form (Left Column)
+
+Glassmorphic contact form with multiple fields:
+
+```typescript
+<GlassCard className="lg:row-span-2 bg-gradient-to-br from-emerald-950/50 to-brand-green/10 border-white/5">
+  <form className="space-y-6">
+    {/* Name Fields */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label htmlFor="firstName">{contact.form.firstName}</label>
+        <input 
+          type="text" 
+          id="firstName" 
+          className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green"
+          placeholder="John"
+        />
+      </div>
+      <div>
+        <label htmlFor="lastName">{contact.form.lastName}</label>
+        <input type="text" id="lastName" placeholder="Doe" />
+      </div>
+    </div>
+
+    {/* Email & Topic */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label htmlFor="email">{contact.form.email}</label>
+        <input type="email" id="email" placeholder="tu@empresa.com" />
+      </div>
+      <div>
+        <label htmlFor="topic">{contact.form.topic}</label>
+        <input type="text" id="topic" placeholder="Consulta General" />
+      </div>
+    </div>
+
+    {/* Message */}
+    <div>
+      <label htmlFor="message">{contact.form.message}</label>
+      <textarea 
+        id="message" 
+        rows={4} 
+        className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3"
+        placeholder="Escribe tu mensaje aquí..."
+      ></textarea>
+    </div>
+    
+    {/* Submit Button */}
+    <button type="button" className="w-full bg-brand-green text-brand-dark font-bold py-4 rounded-lg hover:bg-white hover:text-brand-green transition-all">
+      {contact.form.submit}
+    </button>
+  </form>
+</GlassCard>
+```
+
+**Location:** `pages/Contact.tsx:51-110`
+
+**Form Fields:**
+- First Name (text input)
+- Last Name (text input)
+- Email (email input)
+- Topic (text input)
+- Message (textarea, 4 rows)
+- Submit button
+
+<Note>
+  The form currently uses `type="button"` and does not have submit functionality. You'll need to add form handling logic for production use.
+</Note>
+
+### 3. Contact Information (Right Column)
+
+Company contact details with icons:
+
+```typescript
+<div className="space-y-8 pt-4">
+  {/* Section Header */}
+  <div>
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5">
+      <Send className="w-3 h-3" />
+      {contact.infoSection?.badge}
+    </div>
+    <h2 className="text-4xl font-bold text-white mb-4">
+      {contact.infoSection?.title}
+    </h2>
+    <p className="text-glass-muted text-lg">
+      {contact.infoSection?.description}
+    </p>
+  </div>
+
+  {/* Contact Info Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    {/* Locations (First 2) */}
+    {siteContent.brand.contact.locations?.slice(0, 2).map((loc, idx) => (
+      <div key={idx} className="space-y-2">
+        <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center mb-2">
+          <MapPin className="text-brand-green w-5 h-5" />
+        </div>
+        <h4 className="text-white font-bold">{loc.country}</h4>
+        <p className="text-sm text-glass-muted">{loc.address}</p>
+      </div>
+    ))}
+
+    {/* Email */}
+    <div className="space-y-2">
+      <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center mb-2">
+        <Mail className="text-brand-green w-5 h-5" />
+      </div>
+      <h4 className="text-white font-bold">Email</h4>
+      <p className="text-sm text-glass-muted">{siteContent.brand.contact.email}</p>
+    </div>
+
+    {/* Phone */}
+    <div className="space-y-2">
+      <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center mb-2">
+        <Phone className="text-brand-green w-5 h-5" />
+      </div>
+      <h4 className="text-white font-bold">Teléfono</h4>
+      <p className="text-sm text-glass-muted">{siteContent.brand.contact.phone}</p>
+    </div>
+  </div>
+</div>
+```
+
+**Location:** `pages/Contact.tsx:113-157`
+
+**Contact Details Displayed:**
+- Two office locations (from 4 available)
+- Email address
+- Phone number
+
+## Location Data
+
+The application has 4 global locations defined:
+
+```typescript
+siteContent.brand.contact.locations: [
+  { country: "Colombia", address: "Carrera 69P #74B-71 Bogotá" },
+  { country: "USA", address: "8209 NW 70 St. Miami, FL 33166" },
+  { country: "México", address: "Anillo Vial Fray Junipero, Salitre San José El Alto, Solar Urbano 106 4, Queretaro" },
+  { country: "Ecuador", address: "Vasco de Contreras N36-235 y Mañosca, Quito" }
+]
+```
+
+The Contact page shows only the first 2 locations (Colombia and USA):
+
+```typescript
+{siteContent.brand.contact.locations?.slice(0, 2).map((loc, idx) => (
+  // Location display
+))}
+```
+
+## Components Used
+
+### GlassCard
+
+```typescript
+import { GlassCard } from '../components/ui/GlassCard';
+
+<GlassCard className="lg:row-span-2 bg-gradient-to-br from-emerald-950/50 to-brand-green/10 border-white/5">
+  {/* Form content */}
+</GlassCard>
+```
+
+### SEO Component
+
+```typescript
+import { SEO } from '../components/SEO';
+
+<SEO 
+  title={contact.meta.title} 
+  description={contact.meta.description} 
+/>
+```
+
+### Icons
+
+```typescript
+import { Send, MapPin, Mail, Phone } from 'lucide-react';
+```
+
+- `Send` - Info section badge
+- `MapPin` - Location markers
+- `Mail` - Email icon
+- `Phone` - Phone icon
+
+## Layout Structure
+
+### Grid Layout
+
+```typescript
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+  {/* Left: Contact Form */}
+  <GlassCard className="lg:row-span-2">
+    <form>...</form>
+  </GlassCard>
+
+  {/* Right: Contact Info */}
+  <div className="space-y-8 pt-4">
+    {/* Info content */}
+  </div>
+</div>
+```
+
+**Responsive Behavior:**
+- Mobile: Single column, form on top
+- Desktop (lg): Two columns, form spans 2 rows
+
+## Form Styling
+
+### Input Fields
+
+```typescript
+className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green transition-colors placeholder-gray-500"
+```
+
+**Features:**
+- Dark glassmorphic background
+- White border with low opacity
+- Focus state: Brand green border + ring
+- Smooth transitions
+- Gray placeholder text
+
+### Submit Button
+
+```typescript
+className="w-full bg-brand-green text-brand-dark font-bold py-4 rounded-lg shadow-lg hover:bg-white hover:text-brand-green transition-all"
+```
+
+**Hover Effect:**
+- Default: Green background, dark text
+- Hover: White background, green text
+
+## Responsive Design
+
+<Tabs>
+  <Tab title="Mobile (< 768px)">
+    - Single column layout
+    - Form fields stack vertically
+    - Contact info below form
+    - Full-width inputs
+  </Tab>
+  
+  <Tab title="Tablet (768px - 1024px)">
+    - Two-column form fields (name, email/topic)
+    - Contact info in 2-column grid
+    - Form still above contact info
+  </Tab>
+  
+  <Tab title="Desktop (> 1024px)">
+    - Two-column page layout
+    - Form on left (spans 2 rows)
+    - Contact info on right
+    - Maximum width: 7xl (80rem)
+  </Tab>
+</Tabs>
+
+## Icon Card Pattern
+
+Reusable pattern for contact info items:
+
+```typescript
+<div className="space-y-2">
+  {/* Icon Circle */}
+  <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center mb-2">
+    <Icon className="text-brand-green w-5 h-5" />
+  </div>
+  
+  {/* Title */}
+  <h4 className="text-white font-bold">{title}</h4>
+  
+  {/* Content */}
+  <p className="text-sm text-glass-muted">{content}</p>
+</div>
+```
+
+## Styling Patterns
+
+### Glassmorphism
+
+```css
+/* Form container */
+bg-gradient-to-br from-emerald-950/50 to-brand-green/10
+border-white/5
+
+/* Input fields */
+bg-black/20
+border-white/10
+backdrop-blur
+```
+
+### Gradient Backgrounds
+
+```css
+/* Hero */
+bg-gradient-to-b from-transparent to-brand-dark
+
+/* Form card */
+bg-gradient-to-br from-emerald-950/50 to-brand-green/10
+```
+
+### Focus States
+
+```typescript
+focus:outline-none 
+focus:border-brand-green 
+focus:ring-1 
+focus:ring-brand-green
+```
+
+## Code Example
+
+<CodeGroup>
+
+```typescript Component Structure
+import React from 'react';
+import { GlassCard } from '../components/ui/GlassCard';
+import { Send, MapPin, Mail, Phone } from 'lucide-react';
+import { siteContent } from '../data/data';
+import { SEO } from '../components/SEO';
+
+export const Contact: React.FC = () => {
+  const { contact } = siteContent;
+  
+  return (
+    <div className="pb-20 relative z-10">
+      <SEO title={contact.meta.title} description={contact.meta.description} />
+      <HeroSection />
+      
+      <div className="max-w-7xl pt-10 mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <ContactForm />
+          <ContactInfo />
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+```typescript Contact Info Card
+<div className="space-y-2">
+  <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center mb-2">
+    <MapPin className="text-brand-green w-5 h-5" />
+  </div>
+  <h4 className="text-white font-bold">{loc.country}</h4>
+  <p className="text-sm text-glass-muted leading-relaxed">{loc.address}</p>
+</div>
+```
+
+```typescript Form Input Pattern
+<div>
+  <label 
+    htmlFor="firstName" 
+    className="block text-sm font-medium text-gray-300 mb-2"
+  >
+    {contact.form.firstName}
+  </label>
+  <input 
+    type="text" 
+    id="firstName" 
+    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green transition-colors placeholder-gray-500"
+    placeholder="John"
+  />
+</div>
+```
+
+</CodeGroup>
+
+## Future Enhancements
+
+<Warning>
+  The contact form currently lacks:
+  - Form validation
+  - Submit handler
+  - API integration
+  - Success/error states
+  - Loading states during submission
+  
+  You'll need to implement these features for production use.
+</Warning>
+
+### Suggested Implementation
+
+```typescript
+const [formData, setFormData] = useState({
+  firstName: '',
+  lastName: '',
+  email: '',
+  topic: '',
+  message: ''
+});
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  
+  try {
+    // API call to submit form
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    
+    if (response.ok) {
+      setStatus('success');
+      setFormData({ firstName: '', lastName: '', email: '', topic: '', message: '' });
+    } else {
+      setStatus('error');
+    }
+  } catch (error) {
+    setStatus('error');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+```
+
+## Related Pages
+
+- [Home Page](/pages/home) - Links to contact in hero section
+- [Solutions Page](/pages/solutions) - Quote CTA links to contact
+- Footer - Contains contact links across all pages

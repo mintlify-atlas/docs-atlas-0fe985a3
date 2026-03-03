@@ -1,0 +1,486 @@
+---
+title: Deployment Guide
+description: Deploy your VENCOL Front Template to Vercel, Netlify, or other hosting platforms
+---
+
+This guide covers deploying your React + TypeScript frontend application to production.
+
+## Overview
+
+The VENCOL Front Template is built with Vite and can be deployed to any static hosting platform. This guide focuses on Vercel and Netlify, the two most popular options.
+
+## Project Configuration
+
+Your project includes build configuration in `package.json`:
+
+```json package.json
+{
+  "name": "vencol---frescura-visible",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}
+```
+
+## Deploying to Vercel
+
+Vercel is the recommended platform for deploying Vite applications. The project includes `vercel.json` configuration.
+
+### Vercel Configuration
+
+```json vercel.json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+This configuration ensures all routes are handled by the React Router in your SPA.
+
+### Deploy via Vercel CLI
+
+<Steps>
+  <Step title="Install Vercel CLI">
+    ```bash
+    npm install -g vercel
+    ```
+  </Step>
+  
+  <Step title="Login to Vercel">
+    ```bash
+    vercel login
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    vercel
+    ```
+    Follow the prompts to configure your project
+  </Step>
+  
+  <Step title="Deploy to production">
+    ```bash
+    vercel --prod
+    ```
+  </Step>
+</Steps>
+
+### Deploy via Vercel Dashboard
+
+<Steps>
+  <Step title="Push to Git">
+    Push your code to GitHub, GitLab, or Bitbucket
+  </Step>
+  
+  <Step title="Import to Vercel">
+    Go to [vercel.com/new](https://vercel.com/new) and import your repository
+  </Step>
+  
+  <Step title="Configure build settings">
+    - **Framework Preset**: Vite
+    - **Build Command**: `vite build`
+    - **Output Directory**: `dist`
+    - **Install Command**: `npm install`
+  </Step>
+  
+  <Step title="Add environment variables">
+    If using WordPress integration:
+    ```
+    VITE_WORDPRESS_API_URL=https://your-wordpress-site.com/wp-json/wp/v2
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    Click "Deploy" and wait for the build to complete
+  </Step>
+</Steps>
+
+<Note>
+  Vercel will automatically deploy new commits from your main branch. Preview deployments are created for pull requests.
+</Note>
+
+## Deploying to Netlify
+
+Netlify is another excellent option for deploying static sites.
+
+### Netlify Configuration
+
+Create `netlify.toml` in your project root:
+
+```toml netlify.toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+### Deploy via Netlify CLI
+
+<Steps>
+  <Step title="Install Netlify CLI">
+    ```bash
+    npm install -g netlify-cli
+    ```
+  </Step>
+  
+  <Step title="Login to Netlify">
+    ```bash
+    netlify login
+    ```
+  </Step>
+  
+  <Step title="Initialize your site">
+    ```bash
+    netlify init
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    netlify deploy --prod
+    ```
+  </Step>
+</Steps>
+
+### Deploy via Netlify Dashboard
+
+<Steps>
+  <Step title="Push to Git">
+    Push your code to GitHub, GitLab, or Bitbucket
+  </Step>
+  
+  <Step title="Import to Netlify">
+    Go to [app.netlify.com](https://app.netlify.com) and click "Add new site"
+  </Step>
+  
+  <Step title="Configure build settings">
+    - **Build command**: `npm run build`
+    - **Publish directory**: `dist`
+    - **Base directory**: (leave empty)
+  </Step>
+  
+  <Step title="Add environment variables">
+    In Site settings → Build & deploy → Environment:
+    ```
+    VITE_WORDPRESS_API_URL=https://your-wordpress-site.com/wp-json/wp/v2
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    Click "Deploy site"
+  </Step>
+</Steps>
+
+## Building Locally
+
+Test your production build locally before deploying:
+
+```bash
+# Build the application
+npm run build
+
+# Preview the production build
+npm run preview
+```
+
+The build output will be in the `dist` directory.
+
+## Environment Variables
+
+Vite uses environment variables prefixed with `VITE_`.
+
+### Local Development
+
+Create `.env` in your project root:
+
+```bash .env
+VITE_WORDPRESS_API_URL=https://cms.gobigagency.co/vencol/wp-json/wp/v2
+VITE_GEMINI_API_KEY=your-api-key-here
+```
+
+<Warning>
+  Never commit `.env` files to Git. Add `.env` to your `.gitignore` file.
+</Warning>
+
+### Production Variables
+
+<CodeGroup>
+
+```bash Vercel
+# In Vercel Dashboard: Settings → Environment Variables
+VITE_WORDPRESS_API_URL=https://cms.gobigagency.co/vencol/wp-json/wp/v2
+VITE_GEMINI_API_KEY=your-production-key
+```
+
+```bash Netlify
+# In Netlify Dashboard: Site settings → Build & deploy → Environment
+VITE_WORDPRESS_API_URL=https://cms.gobigagency.co/vencol/wp-json/wp/v2
+VITE_GEMINI_API_KEY=your-production-key
+```
+
+</CodeGroup>
+
+### Accessing Environment Variables
+
+In your code:
+
+```tsx
+const apiUrl = import.meta.env.VITE_WORDPRESS_API_URL;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+```
+
+## Custom Domain Setup
+
+### Vercel Custom Domain
+
+<Steps>
+  <Step title="Open project settings">
+    Go to your project in Vercel Dashboard → Settings → Domains
+  </Step>
+  
+  <Step title="Add domain">
+    Enter your custom domain (e.g., `www.vencol.com`)
+  </Step>
+  
+  <Step title="Configure DNS">
+    Add the following DNS records at your domain registrar:
+    
+    **Option A: Using A record**
+    ```
+    A     @     76.76.21.21
+    ```
+    
+    **Option B: Using CNAME**
+    ```
+    CNAME www   cname.vercel-dns.com
+    ```
+  </Step>
+  
+  <Step title="Wait for DNS propagation">
+    SSL certificate will be automatically issued (may take a few minutes)
+  </Step>
+</Steps>
+
+### Netlify Custom Domain
+
+<Steps>
+  <Step title="Open domain settings">
+    Site settings → Domain management → Add custom domain
+  </Step>
+  
+  <Step title="Add domain">
+    Enter your custom domain
+  </Step>
+  
+  <Step title="Configure DNS">
+    Point your domain to Netlify:
+    ```
+    A     @     75.2.60.5
+    CNAME www   your-site-name.netlify.app
+    ```
+  </Step>
+  
+  <Step title="Enable HTTPS">
+    Netlify will automatically provision an SSL certificate
+  </Step>
+</Steps>
+
+## Performance Optimization
+
+### 1. Enable Build Caching
+
+Both Vercel and Netlify cache `node_modules` automatically.
+
+### 2. Image Optimization
+
+<Warning>
+  Use a CDN for images. Services like Cloudinary, Imgix, or WordPress media library with CDN integration are recommended.
+</Warning>
+
+### 3. Code Splitting
+
+Vite automatically splits code by routes. To optimize further:
+
+```tsx App.tsx
+import { lazy, Suspense } from 'react';
+
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+
+<Suspense fallback={<div>Loading...</div>}>
+  <Routes>
+    <Route path="/" element={<Home />} />
+    <Route path="/nosotros" element={<About />} />
+  </Routes>
+</Suspense>
+```
+
+### 4. Bundle Analysis
+
+Analyze your bundle size:
+
+```bash
+npm install -D rollup-plugin-visualizer
+```
+
+Update `vite.config.ts`:
+
+```tsx vite.config.ts
+import { visualizer } from 'rollup-plugin-visualizer';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    visualizer({ open: true })
+  ]
+});
+```
+
+Run `npm run build` to generate a bundle analysis.
+
+## Continuous Deployment
+
+Both Vercel and Netlify support automatic deployments:
+
+### Git Workflow
+
+<Steps>
+  <Step title="Push to branch">
+    ```bash
+    git checkout -b feature/new-solution
+    git add .
+    git commit -m "Add new biodegradable packaging solution"
+    git push origin feature/new-solution
+    ```
+  </Step>
+  
+  <Step title="Preview deployment created">
+    Both platforms create a preview URL for your branch
+  </Step>
+  
+  <Step title="Merge to main">
+    ```bash
+    git checkout main
+    git merge feature/new-solution
+    git push origin main
+    ```
+  </Step>
+  
+  <Step title="Production deployment">
+    Automatically deployed to your production domain
+  </Step>
+</Steps>
+
+## Monitoring & Analytics
+
+### Vercel Analytics
+
+Enable analytics in your Vercel dashboard:
+1. Project Settings → Analytics
+2. Enable Web Analytics
+3. No code changes required
+
+### Google Analytics
+
+Add Google Analytics to `index.html`:
+
+```html index.html
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+```
+
+## Troubleshooting
+
+### Build Fails on Deployment
+
+1. **Check build logs** in your hosting platform dashboard
+2. **Test locally**: Run `npm run build` to replicate the error
+3. **Check Node version**: Ensure your hosting platform uses Node 18+
+4. **Clear cache**: Force a clean build without cache
+
+### Routes Return 404
+
+**Problem**: Direct navigation to `/nosotros` returns 404
+
+**Solution**: Ensure your `vercel.json` or `netlify.toml` includes SPA redirects
+
+### Environment Variables Not Working
+
+1. **Check prefix**: Must start with `VITE_`
+2. **Rebuild**: Environment variables require a new build
+3. **Check scope**: Ensure variables are set for production environment
+
+### Images Not Loading
+
+1. **Check CORS**: Ensure image CDN allows your domain
+2. **Check URLs**: Use absolute URLs, not relative paths
+3. **Check HTTPS**: Mixed content (HTTP images on HTTPS site) may be blocked
+
+## Deployment Checklist
+
+<Steps>
+  <Step title="Update site metadata">
+    Update `siteUrl` in `data/data.tsx` with your production domain
+  </Step>
+  
+  <Step title="Configure WordPress URL">
+    Set `VITE_WORDPRESS_API_URL` environment variable
+  </Step>
+  
+  <Step title="Test production build">
+    Run `npm run build && npm run preview` locally
+  </Step>
+  
+  <Step title="Check responsive design">
+    Test on mobile, tablet, and desktop
+  </Step>
+  
+  <Step title="Verify all routes work">
+    Test navigation to all pages
+  </Step>
+  
+  <Step title="Set up custom domain">
+    Configure DNS and wait for SSL certificate
+  </Step>
+  
+  <Step title="Enable analytics">
+    Set up Google Analytics or platform analytics
+  </Step>
+  
+  <Step title="Test contact form">
+    Ensure form submissions work (if implemented)
+  </Step>
+</Steps>
+
+## Next Steps
+
+After deployment:
+
+- Monitor performance with Lighthouse
+- Set up uptime monitoring (e.g., UptimeRobot)
+- Configure Google Search Console
+- Submit sitemap to search engines
+- Set up email notifications for build failures
+
+## Additional Resources
+
+- [Vite Production Build Guide](https://vitejs.dev/guide/build.html)
+- [Vercel Documentation](https://vercel.com/docs)
+- [Netlify Documentation](https://docs.netlify.com)
+- [React Router Documentation](https://reactrouter.com)

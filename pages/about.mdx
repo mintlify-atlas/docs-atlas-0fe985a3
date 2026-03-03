@@ -1,0 +1,347 @@
+---
+title: About Page Component
+description: Documentation for the About page component, showcasing company information and values in the VENCOL Front Template.
+---
+
+# About Page Component
+
+The About page (`pages/About.tsx`) presents detailed information about VENCOL, including company history, values, and partnerships.
+
+## Purpose
+
+The About page serves to:
+
+- Communicate the company's mission and values
+- Display the 3P's methodology (Personas, Planeta, Producto)
+- Showcase experience and expertise
+- Present partner relationships
+- Build trust with potential clients
+
+## Data Sources
+
+### Static Content
+
+```typescript
+import { siteContent } from '../data/data';
+
+const { about, home } = siteContent;
+```
+
+The component uses two main data sources:
+
+- `siteContent.about` - About page-specific content (hero section, meta tags)
+- `siteContent.home` - Shared content reused from home page (about section, 3P's, partners)
+
+<Note>
+  The About page reuses several sections from the Home page data structure to maintain consistency across the application.
+</Note>
+
+## Page Structure
+
+The About page consists of three main sections:
+
+### 1. Hero Section
+
+Full-width hero with background image and page introduction:
+
+```typescript
+<div className="relative h-[60vh] min-h-[500px]">
+  <div className="absolute inset-0 z-0">
+    <img src={about.hero.image} alt="About Hero" />
+    <div className="absolute inset-0 bg-brand-dark/80 backdrop-blur-[2px]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-dark" />
+  </div>
+  
+  <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
+    <div className="inline-flex items-center px-4 py-1.5 rounded-full">
+      <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse" />
+      <span>{about.hero.badge}</span>
+    </div>
+    <h1>{about.hero.title}</h1>
+    <p>{about.hero.description}</p>
+  </div>
+</div>
+```
+
+**Location:** `pages/About.tsx:18-46`
+
+**Features:**
+- Background image with dark overlay
+- Gradient overlay for text readability
+- Animated badge indicator
+- Responsive text sizing
+
+### 2. Content Section
+
+Two-column layout showcasing company information:
+
+**Left Column - Image:**
+- Company team/office image
+- Animated experience badge overlay
+- Hover effects (grayscale to color transition)
+- Decorative background blurs
+
+**Right Column - Content:**
+- Company description
+- Highlighted quote in glassmorphic card
+- Feature list with checkmarks
+- Company values and mission
+
+```typescript
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+  {/* Left: Image with badge */}
+  <div className="relative group">
+    <img 
+      src={home.about.image} 
+      className="grayscale-[20%] group-hover:grayscale-0 transition-all"
+    />
+    <div className="absolute bottom-6 right-6 glass-panel">
+      <Sparkles className="w-5 h-5" />
+      <p>{home.about.experienceBadge.text}</p>
+      <p>{home.about.experienceBadge.value}</p>
+    </div>
+  </div>
+
+  {/* Right: Content */}
+  <div className="space-y-8">
+    <p>{home.about.description}</p>
+    
+    {/* Quote Card */}
+    <GlassCard className="border-l-4 border-l-brand-green">
+      <Quote className="text-brand-green" />
+      <p>"{home.about.quote}"</p>
+    </GlassCard>
+    
+    {/* Features */}
+    {home.about.features.map((feature) => (
+      <div className="flex items-center">
+        <Check className="text-brand-green" />
+        <span>{feature}</span>
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+**Location:** `pages/About.tsx:51-134`
+
+### 3. The 3P's Section
+
+Displays the company's core methodology - Personas, Planeta, Producto:
+
+```typescript
+<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+  {home.threePs.items.map((item) => (
+    <GlassCard key={item.id} hoverEffect className="text-center py-12">
+      <div className="absolute inset-0 z-[-1]">
+        <img src={item.bgImage} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-brand-dark/80 backdrop-blur-[2px]" />
+      </div>
+      
+      <div className={`w-20 h-20 rounded-full ${item.iconBg}`}>
+        <item.icon className={`h-10 w-10 ${item.iconColor}`} />
+      </div>
+      
+      <h3>{item.title}</h3>
+      <p>{item.description}</p>
+      <span className="text-brand-green">{item.result}</span>
+    </GlassCard>
+  ))}
+</div>
+```
+
+**Location:** `pages/About.tsx:136-169`
+
+**Data Structure:**
+```typescript
+interface ThreePItem {
+  id: string;
+  title: string;
+  description: string;
+  result: string;
+  icon: LucideIcon;
+  iconBg: string;      // Tailwind classes for background
+  iconColor: string;   // Tailwind classes for icon color
+  bgImage: string;     // Background image URL
+}
+```
+
+### 4. Partners Section
+
+Infinite scrolling marquee of partner logos:
+
+```typescript
+<div className="animate-marquee whitespace-nowrap flex gap-16 items-center">
+  {home.partners.logos.map((logo, index) => (
+    <div key={`p1-${index}`} className="w-32 h-32 bg-white rounded-xl">
+      <img src={logo} alt="Partner Logo" className="grayscale hover:grayscale-0" />
+    </div>
+  ))}
+  {/* Duplicate for seamless loop */}
+  {home.partners.logos.map((logo, index) => (
+    <div key={`p2-${index}`} className="w-32 h-32 bg-white rounded-xl">
+      <img src={logo} alt="Partner Logo" />
+    </div>
+  ))}
+</div>
+```
+
+**Location:** `pages/About.tsx:172-202`
+
+## Components Used
+
+### GlassCard
+
+Glassmorphic card component for modern UI:
+
+```typescript
+import { GlassCard } from '../components/ui/GlassCard';
+
+<GlassCard className="bg-black/40 border-l-4 border-l-brand-green" hoverEffect>
+  {children}
+</GlassCard>
+```
+
+**Props:**
+- `className` - Additional Tailwind classes
+- `hoverEffect` - Enable hover animations
+- `children` - Card content
+
+### SEO Component
+
+SEO meta tags for the About page:
+
+```typescript
+import { SEO } from '../components/SEO';
+
+<SEO 
+  title={about.meta.title} 
+  description={about.meta.description} 
+  image={about.hero.image}
+/>
+```
+
+### Icons
+
+Lucide React icons used:
+
+```typescript
+import { ArrowRight, Quote, Check, Sparkles, Shield } from 'lucide-react';
+```
+
+## Styling Patterns
+
+### Glassmorphism
+
+The page extensively uses glassmorphic design:
+
+```css
+/* Applied via glass-panel class */
+backdrop-blur-md
+bg-white/5
+border border-white/10
+```
+
+### Gradient Overlays
+
+```css
+/* Hero section */
+bg-gradient-to-b from-transparent to-brand-dark
+
+/* Cards */
+bg-gradient-to-br from-emerald-950/50 to-brand-green/10
+```
+
+### Hover Effects
+
+```typescript
+// Image grayscale transition
+className="grayscale-[20%] group-hover:grayscale-0 transition-all duration-500"
+
+// Card hover
+className="hover:bg-white/5 hover:-translate-y-1 hover:shadow-lg"
+```
+
+## Responsive Design
+
+<Tabs>
+  <Tab title="Mobile">
+    - Single column layout
+    - Stacked sections
+    - Reduced text sizes
+    - Full-width images
+  </Tab>
+  <Tab title="Tablet">
+    - Two-column grid for 3P's section
+    - Medium text sizes
+    - Optimized spacing
+  </Tab>
+  <Tab title="Desktop">
+    - Full multi-column layouts
+    - Large text sizes
+    - Maximum container width: 7xl (80rem)
+    - Sticky elements enabled
+  </Tab>
+</Tabs>
+
+## Code Example
+
+<CodeGroup>
+
+```typescript Component Structure
+import React from 'react';
+import { GlassCard } from '../components/ui/GlassCard';
+import { Quote, Check, Sparkles, Shield } from 'lucide-react';
+import { siteContent } from '../data/data';
+import { SEO } from '../components/SEO';
+
+export const About: React.FC = () => {
+  const { about, home } = siteContent;
+  
+  return (
+    <div className="min-h-screen bg-brand-dark">
+      <SEO 
+        title={about.meta.title} 
+        description={about.meta.description} 
+        image={about.hero.image}
+      />
+      
+      {/* Hero Section */}
+      {/* Content Section */}
+      {/* 3P's Section */}
+      {/* Partners Section */}
+    </div>
+  );
+};
+```
+
+```typescript Quote Card Pattern
+<div className="relative py-2">
+  <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-brand-green/20 rounded-full blur-2xl"></div>
+  
+  <GlassCard className="relative bg-black/40 border-l-4 border-l-brand-green !rounded-r-xl !rounded-l-sm p-6">
+    <div className="absolute -top-4 left-6 bg-brand-dark border border-white/10 p-2 rounded-lg">
+      <Quote className="text-brand-green w-6 h-6 fill-current" />
+    </div>
+    <p className="text-white text-lg font-medium italic pt-4">
+      "{home.about.quote}"
+    </p>
+  </GlassCard>
+</div>
+```
+
+</CodeGroup>
+
+## Navigation
+
+The About page is accessed via:
+
+- Navigation menu: `/nosotros`
+- Home page CTA button
+- Footer links
+
+## Related Pages
+
+- [Home Page](/pages/home) - Main landing page with about preview
+- [Contact Page](/pages/contact) - Contact information
+- [Solutions Page](/pages/solutions) - Products and services

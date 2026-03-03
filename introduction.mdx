@@ -1,0 +1,193 @@
+---
+title: "Welcome to VENCOL Front Template"
+description: "A modern React + TypeScript application for showcasing food packaging solutions with WordPress integration, Glassmorphism design, and comprehensive SEO features."
+---
+
+# Welcome to VENCOL Front Template
+
+VENCOL Front Template is a production-ready web application developed for VENCOL, experts in packaging and preservation solutions for the fresh food industry in Latin America. This platform presents a comprehensive catalog of products, technologies like Cryovac and Novipax, and educational resources through an integrated blog.
+
+<Note>
+  **Hacemos visible la frescura** - Making freshness visible through innovative packaging solutions.
+</Note>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Modern React Architecture" icon="react" href="#tech-stack">
+    Built with React 18, TypeScript, and Vite for blazing-fast development and optimal performance.
+  </Card>
+  
+  <Card title="WordPress Integration" icon="wordpress" href="#wordpress-integration">
+    Seamlessly fetches blog posts and pages from WordPress CMS via REST API.
+  </Card>
+  
+  <Card title="Glassmorphism Design" icon="palette" href="#design-system">
+    Stunning UI with glassmorphism effects, smooth animations, and fully responsive layout.
+  </Card>
+  
+  <Card title="SEO Optimized" icon="search" href="#seo-features">
+    Complete SEO support with react-helmet-async for meta tags, Open Graph, and social sharing.
+  </Card>
+</CardGroup>
+
+## Tech Stack
+
+VENCOL Front Template is built with modern web technologies:
+
+- **React 18.3.1** - Modern UI library with hooks and concurrent features
+- **TypeScript 5.8** - Type-safe development with full IntelliSense support
+- **Vite 6.2** - Next-generation frontend tooling with HMR
+- **React Router 6.22** - Client-side routing for SPA navigation
+- **Tailwind CSS** - Utility-first CSS via CDN with typography plugin
+- **Lucide React** - Beautiful, consistent icon library
+- **React Helmet Async** - Document head manager for SEO
+
+## Project Structure
+
+The application follows a clean, modular architecture:
+
+```
+workspace/source/
+├── components/           # Reusable UI components
+│   ├── ui/              # Base UI components (GlassCard, BackgroundBlobs)
+│   ├── Navbar.tsx       # Navigation with dropdown menus
+│   ├── Footer.tsx       # Site footer
+│   └── SEO.tsx          # SEO meta tags component
+├── pages/               # Route pages
+│   ├── Home.tsx         # Landing page with hero, features, FAQ
+│   ├── About.tsx        # Company information
+│   ├── SolutionDetail.tsx  # Individual solution pages
+│   ├── Blog.tsx         # Blog listing
+│   ├── BlogDetail.tsx   # Individual blog posts
+│   ├── Contact.tsx      # Contact page
+│   └── PageDetail.tsx   # Dynamic WordPress pages
+├── data/                # Static data and content
+│   ├── data.tsx         # Site content and configuration
+│   └── solutions.tsx    # Solutions catalog data
+├── lib/                 # Utility functions
+│   └── wordpress.ts     # WordPress API integration
+├── App.tsx              # Main app component with routing
+├── index.tsx            # Application entry point
+├── types.ts             # TypeScript type definitions
+└── vite.config.ts       # Vite configuration
+```
+
+## WordPress Integration
+
+The application integrates with WordPress CMS for dynamic content:
+
+```typescript App.tsx
+import { fetchBlogPosts } from './lib/wordpress';
+
+// Fetch posts from WordPress
+const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+
+useEffect(() => {
+  fetchBlogPosts()
+    .then((wpPosts) => {
+      if (wpPosts.length > 0) setBlogPosts(wpPosts);
+    })
+    .catch((err) => console.warn('WP blog fetch failed, using fallback:', err));
+}, []);
+```
+
+The WordPress API integration (`lib/wordpress.ts:69-80`) provides:
+- Blog post fetching with featured images
+- Category and tag support
+- Dynamic page routing
+- Automatic HTML sanitization
+- Fallback content for offline scenarios
+
+## Design System
+
+The application features a sophisticated glassmorphism design with:
+
+### GlassCard Component
+
+```tsx components/ui/GlassCard.tsx
+export const GlassCard: React.FC<GlassCardProps> = ({ 
+  children, 
+  className = '', 
+  hoverEffect = false 
+}) => {
+  return (
+    <div 
+      className={`
+        glass-panel rounded-2xl p-6 transition-all duration-300
+        ${hoverEffect ? 'hover:bg-white/5 hover:-translate-y-1 hover:shadow-lg hover:shadow-brand-green/10' : ''}
+        ${className}
+      `}
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+### Color Scheme
+
+- **Primary (Brand Green)**: `#56B501` - Used for CTAs and highlights
+- **Background**: Dark theme with gradient overlays
+- **Glass Effects**: Backdrop blur with white/10 opacity
+- **Accent**: Lime gradients for text highlights
+
+## SEO Features
+
+Comprehensive SEO support with the SEO component:
+
+```tsx pages/Home.tsx
+<SEO 
+  title={home.meta.title} 
+  description={home.meta.description} 
+  image={home.hero.images[0]}
+/>
+```
+
+Features include:
+- Dynamic meta tags per page
+- Open Graph tags for social sharing
+- Twitter Card support
+- Structured data ready
+- Semantic HTML structure
+
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card title="Get Started" icon="rocket" href="/quickstart">
+    Get up and running in 5 minutes with our quickstart guide.
+  </Card>
+  
+  <Card title="Installation" icon="download" href="/installation">
+    Detailed installation instructions for npm, pnpm, and yarn.
+  </Card>
+</CardGroup>
+
+## Navigation Structure
+
+The application includes:
+- **Home** - Hero section with image slider, features showcase, partners marquee, FAQ
+- **Nosotros** (About) - Company information and values
+- **Soluciones** (Solutions) - Dropdown menu with 5 product categories:
+  - Bolsas Termoencogibles Cryovac
+  - Film de Empaque Termoformado
+  - Absorbentes Tipo Almohadilla
+  - Foils para Etiquetas
+  - Foils de Marcación
+- **Blog** - Educational content integrated from WordPress
+- **Contacto** (Contact) - Contact forms and support channels
+
+## Development Philosophy
+
+VENCOL Front Template is designed with:
+
+✓ **Type Safety** - Full TypeScript coverage for reliability  
+✓ **Component Reusability** - Modular architecture for maintainability  
+✓ **Performance** - Optimized builds with Vite  
+✓ **Accessibility** - Semantic HTML and ARIA attributes  
+✓ **Responsive Design** - Mobile-first approach with Tailwind CSS  
+✓ **SEO First** - Built-in meta tag management and social sharing  
+
+<Card title="Ready to get started?" icon="play">
+  Continue to the [Quickstart Guide](/quickstart) to launch your development environment in minutes.
+</Card>

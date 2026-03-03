@@ -1,0 +1,236 @@
+---
+title: SEO Component
+description: Meta tags and SEO optimization using react-helmet-async
+---
+
+The `SEO` component manages page metadata, including title, description, Open Graph tags, and Twitter cards using `react-helmet-async`.
+
+## Features
+
+- Dynamic page title with template support
+- Meta description management
+- Open Graph tags for social sharing
+- Twitter card metadata
+- Favicon configuration
+- Language attribute setting
+- Image and URL metadata
+
+## Installation
+
+The component requires `react-helmet-async`:
+
+```bash
+npm install react-helmet-async
+```
+
+## Usage
+
+### Basic Usage
+
+```tsx
+import { SEO } from '../components/SEO';
+
+function HomePage() {
+  return (
+    <div>
+      <SEO 
+        title="Home"
+        description="Welcome to our website"
+      />
+      {/* Page content */}
+    </div>
+  );
+}
+```
+
+### With All Props
+
+```tsx
+<SEO 
+  title="Blog Post Title"
+  description="This is an amazing blog post about React"
+  image="https://example.com/og-image.jpg"
+  url="https://example.com/blog/post-slug"
+  type="article"
+/>
+```
+
+## Props
+
+The component accepts the following props:
+
+<ParamField path="title" type="string" optional>
+  Page title. Falls back to `meta.defaultTitle` from siteContent
+</ParamField>
+
+<ParamField path="description" type="string" optional>
+  Page description for meta tags. Falls back to `meta.defaultDescription`
+</ParamField>
+
+<ParamField path="image" type="string" optional>
+  Social sharing image URL. Falls back to `meta.defaultImage`
+</ParamField>
+
+<ParamField path="url" type="string" optional>
+  Canonical page URL. Falls back to `meta.siteUrl`
+</ParamField>
+
+<ParamField path="type" type="string" default="website">
+  Open Graph content type. Common values: `website`, `article`, `profile`
+</ParamField>
+
+## TypeScript Interface
+
+```typescript
+interface SEOProps {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  type?: string;
+}
+```
+
+## Meta Configuration
+
+The component reads default values from `siteContent.meta`:
+
+```typescript
+const siteContent = {
+  meta: {
+    defaultTitle: string;        // Default page title
+    titleTemplate: string;       // Template for formatting titles (e.g., "%s | Site Name")
+    defaultDescription: string;  // Default meta description
+    defaultImage: string;        // Default OG image URL
+    siteUrl: string;            // Base site URL
+    siteName: string;           // Site name for OG tags
+    favicon: string;            // Favicon URL
+  }
+};
+```
+
+## Generated Meta Tags
+
+The component generates the following meta tags:
+
+### Basic Meta Tags
+
+```html
+<html lang="es" />
+<meta name="description" content="..." />
+<meta name="image" content="..." />
+<link rel="icon" type="image/png" href="..." />
+```
+
+### Open Graph Tags
+
+```html
+<meta property="og:type" content="website" />
+<meta property="og:title" content="..." />
+<meta property="og:description" content="..." />
+<meta property="og:image" content="..." />
+<meta property="og:url" content="..." />
+<meta property="og:site_name" content="..." />
+```
+
+### Twitter Card Tags
+
+```html
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="..." />
+<meta name="twitter:description" content="..." />
+<meta name="twitter:image" content="..." />
+```
+
+## Title Template
+
+The component uses `titleTemplate` for formatting:
+
+```tsx
+<Helmet
+  title={title}
+  titleTemplate={meta.titleTemplate}  // e.g., "%s | VENCOL"
+  defaultTitle={meta.defaultTitle}
+>
+```
+
+If `titleTemplate` is `"%s | VENCOL"` and `title` is `"Blog"`, the final title will be `"Blog | VENCOL"`.
+
+## Implementation Example
+
+Here's how it's used in the Home page:
+
+```tsx
+// pages/Home.tsx:44
+export const Home: React.FC = () => {
+  const { home, meta } = siteContent;
+  
+  return (
+    <div className="relative z-10">
+      <SEO 
+        title={home.meta.title} 
+        description={home.meta.description} 
+        image={home.hero.images[0]}
+      />
+      {/* Page content */}
+    </div>
+  );
+};
+```
+
+## SEO Object Structure
+
+Internally, the component builds a SEO object with fallbacks:
+
+```typescript
+const seo = {
+  title: title || meta.defaultTitle,
+  description: description || meta.defaultDescription,
+  image: image || meta.defaultImage,
+  url: url || meta.siteUrl,
+};
+```
+
+## Language Configuration
+
+The component sets the HTML lang attribute to Spanish:
+
+```tsx
+<html lang="es" />
+```
+
+<Note>
+To change the language, modify the `lang` attribute in the component.
+</Note>
+
+## Twitter Card Type
+
+The component uses `summary_large_image` for Twitter cards, which displays a large image preview when shared on Twitter.
+
+## Best Practices
+
+1. **Always provide a title and description** for better SEO
+2. **Use high-quality images** (minimum 1200x630px for OG images)
+3. **Provide unique content** for each page
+4. **Use absolute URLs** for images and canonical URLs
+5. **Set appropriate Open Graph type** (`article` for blog posts, `website` for pages)
+
+## Example Configuration
+
+```typescript
+const siteContent = {
+  meta: {
+    defaultTitle: 'VENCOL - Sustainable Solutions',
+    titleTemplate: '%s | VENCOL',
+    defaultDescription: 'Leading provider of sustainable environmental solutions',
+    defaultImage: 'https://vencol.com/og-image.jpg',
+    siteUrl: 'https://vencol.com',
+    siteName: 'VENCOL',
+    favicon: '/favicon.png'
+  }
+};
+```
+
+## Component Location
+
+`components/SEO.tsx:13`

@@ -1,0 +1,378 @@
+---
+title: WordPress Setup
+description: Configure WordPress CMS integration for blog posts and dynamic content in your VENCOL Front Template
+---
+
+This guide explains how to integrate WordPress as a headless CMS for managing blog posts and page content dynamically.
+
+## Overview
+
+The VENCOL Front Template uses WordPress REST API to fetch blog posts and pages. The integration is already set up in `lib/wordpress.ts`.
+
+## WordPress API Configuration
+
+The WordPress API endpoint is configured in `lib/wordpress.ts`:
+
+```tsx lib/wordpress.ts
+const WP_API_URL = 'https://cms.gobigagency.co/vencol/wp-json/wp/v2';
+```
+
+### Updating the WordPress URL
+
+<Steps>
+  <Step title="Open lib/wordpress.ts">
+    Locate the `WP_API_URL` constant at the top of the file
+  </Step>
+  
+  <Step title="Replace with your WordPress URL">
+    ```tsx lib/wordpress.ts
+    const WP_API_URL = 'https://your-wordpress-site.com/wp-json/wp/v2';
+    ```
+  </Step>
+  
+  <Step title="Test the connection">
+    Visit `https://your-wordpress-site.com/wp-json/wp/v2/posts` in your browser to verify the API is accessible
+  </Step>
+</Steps>
+
+<Note>
+  The WordPress REST API is enabled by default in WordPress 4.7+. No plugins required for basic functionality.
+</Note>
+
+## Available WordPress Functions
+
+The template provides two main functions for fetching content:
+
+### 1. Fetch Blog Posts
+
+```tsx lib/wordpress.ts
+export async function fetchBlogPosts(perPage = 10): Promise<BlogPost[]> {
+  const res = await fetch(
+    `${WP_API_URL}/posts?per_page=${perPage}&_embed`
+  );
+  
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+  
+  const posts: WPPost[] = await res.json();
+  return posts.map(mapWPPostToBlogPost);
+}
+```
+
+**Usage:**
+```tsx YourComponent.tsx
+import { fetchBlogPosts } from '@/lib/wordpress';
+
+const posts = await fetchBlogPosts(10); // Fetch 10 posts
+```
+
+### 2. Fetch Page by Slug
+
+```tsx lib/wordpress.ts
+export async function fetchWPPageBySlug(slug: string): Promise<WPPage | null> {
+  const res = await fetch(
+    `${WP_API_URL}/pages?slug=${encodeURIComponent(slug)}&_embed`
+  );
+  
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+  
+  const pages: WPPost[] = await res.json();
+  if (pages.length === 0) return null;
+  return mapWPPageToWPPage(pages[0]);
+}
+```
+
+**Usage:**
+```tsx YourComponent.tsx
+import { fetchWPPageBySlug } from '@/lib/wordpress';
+
+const page = await fetchWPPageBySlug('about-us');
+```
+
+## Data Mapping
+
+WordPress API responses are automatically transformed to match the application's types:
+
+### BlogPost Type
+
+```tsx types.ts
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;  // HTML stripped automatically
+  content: string;  // Full HTML content
+  date: string;     // Formatted as "Oct 24, 2023"
+  image: string;    // Featured image URL
+  category: string; // First category name
+}
+```
+
+### WPPage Type
+
+```tsx types.ts
+export interface WPPage {
+  id: number;
+  slug: string;
+  title: string;
+  content: string;  // Full HTML content
+  excerpt: string;  // HTML stripped
+  date: string;     // Formatted date
+  image: string;    // Featured image URL
+}
+```
+
+## WordPress Setup Checklist
+
+<Steps>
+  <Step title="Ensure REST API is enabled">
+    Visit `your-site.com/wp-json` - you should see JSON output
+  </Step>
+  
+  <Step title="Configure permalinks">
+    In WordPress Admin: Settings → Permalinks → Choose "Post name"
+  </Step>
+  
+  <Step title="Enable featured images">
+    Ensure your theme supports featured images (post thumbnails)
+  </Step>
+  
+  <Step title="Configure CORS (if needed)">
+    If your WordPress site is on a different domain, enable CORS
+  </Step>
+  
+  <Step title="Create categories">
+    Add categories to organize your blog posts (e.g., "Educativo", "Tecnología")
+  </Step>
+</Steps>
+
+## Enabling CORS for Cross-Domain Access
+
+If your WordPress site is on a different domain than your frontend, you'll need to enable CORS.
+
+### Option 1: Using a Plugin
+
+Install the "REST API CORS Headers" plugin from the WordPress plugin directory.
+
+### Option 2: Adding to functions.php
+
+Add this to your theme's `functions.php`:
+
+```php functions.php
+function add_cors_http_header(){
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: GET");
+}
+add_action('init','add_cors_http_header');
+```
+
+<Warning>
+  Using `*` allows all domains. For production, replace with your specific domain:
+  ```php
+  header("Access-Control-Allow-Origin: https://your-frontend.com");
+  ```
+</Warning>
+
+## Creating Blog Posts in WordPress
+
+<Steps>
+  <Step title="Create a new post">
+    In WordPress Admin: Posts → Add New
+  </Step>
+  
+  <Step title="Add title and content">
+    Write your post title and content using the WordPress editor
+  </Step>
+  
+  <Step title="Set featured image">
+    Set a featured image (recommended: 1200x800px, WebP or JPG)
+  </Step>
+  
+  <Step title="Add excerpt">
+    Write a custom excerpt (max 160 characters recommended)
+  </Step>
+  
+  <Step title="Assign category">
+    Select a category (e.g., "Educativo", "Tecnología", "Seguridad")
+  </Step>
+  
+  <Step title="Publish">
+    Click Publish - the post will appear on your frontend automatically
+  </Step>
+</Steps>
+
+## Testing the Integration
+
+### 1. Test API Endpoint
+
+Open your browser and visit:
+```
+https://your-wordpress-site.com/wp-json/wp/v2/posts?_embed
+```
+
+You should see JSON data with your posts.
+
+### 2. Test in Your Application
+
+Create a test component:
+
+```tsx TestWordPress.tsx
+import { useEffect, useState } from 'react';
+import { fetchBlogPosts } from '@/lib/wordpress';
+import { BlogPost } from '@/types';
+
+export function TestWordPress() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    fetchBlogPosts(5)
+      .then(setPosts)
+      .catch(err => setError(err.message));
+  }, []);
+
+  if (error) return <div>Error: {error}</div>;
+  
+  return (
+    <div>
+      <h2>Latest Posts</h2>
+      {posts.map(post => (
+        <div key={post.id}>
+          <h3>{post.title}</h3>
+          <p>{post.excerpt}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Fallback to Static Content
+
+The application includes fallback blog posts in `data/data.tsx`. If WordPress is unavailable:
+
+```tsx data/data.tsx
+blog: {
+  posts: [
+    {
+      id: 1,
+      title: "¿Qué es la mioglobina?",
+      slug: "que-es-la-mioglobina",
+      excerpt: "El líquido rojo no es sangre...",
+      content: "<p>El líquido rojo que vemos...</p>",
+      date: "Oct 24, 2023",
+      image: "https://picsum.photos/id/431/400/250",
+      category: "Educativo"
+    }
+    // ... more posts
+  ]
+}
+```
+
+You can use these as a fallback:
+
+```tsx YourBlogPage.tsx
+import { fetchBlogPosts } from '@/lib/wordpress';
+import { siteContent } from '@/data/data';
+
+const [posts, setPosts] = useState(siteContent.blog.posts); // Fallback
+
+useEffect(() => {
+  fetchBlogPosts(10)
+    .then(setPosts)
+    .catch(err => {
+      console.error('Using fallback posts:', err);
+      // Already using fallback from initial state
+    });
+}, []);
+```
+
+## Advanced: Custom Post Types
+
+To fetch custom post types from WordPress:
+
+```tsx lib/wordpress.ts
+export async function fetchCustomPosts(postType: string, perPage = 10) {
+  const res = await fetch(
+    `${WP_API_URL}/${postType}?per_page=${perPage}&_embed`
+  );
+  
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+  
+  return await res.json();
+}
+```
+
+**Usage:**
+```tsx
+const testimonials = await fetchCustomPosts('testimonial', 5);
+```
+
+## Environment Variables (Optional)
+
+For better configuration management, move the API URL to an environment variable:
+
+<Steps>
+  <Step title="Create .env file">
+    ```bash
+    VITE_WORDPRESS_API_URL=https://cms.gobigagency.co/vencol/wp-json/wp/v2
+    ```
+  </Step>
+  
+  <Step title="Update lib/wordpress.ts">
+    ```tsx lib/wordpress.ts
+    const WP_API_URL = import.meta.env.VITE_WORDPRESS_API_URL || 
+                       'https://cms.gobigagency.co/vencol/wp-json/wp/v2';
+    ```
+  </Step>
+  
+  <Step title="Update vite.config.ts (if needed)">
+    The environment variable will be automatically available via `import.meta.env`
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Posts Not Loading
+
+1. **Check API URL**: Verify the URL is correct and accessible
+2. **Check CORS**: Look for CORS errors in browser console
+3. **Check WordPress version**: Ensure WordPress 4.7+ is installed
+4. **Check permalinks**: "Post name" structure is recommended
+
+### Featured Images Not Showing
+
+1. Ensure `_embed` parameter is included in API calls
+2. Check that featured images are set in WordPress
+3. Verify image URLs are publicly accessible
+
+### Categories Not Appearing
+
+1. Ensure posts have assigned categories
+2. Check that `_embed` parameter is included
+3. Verify the category taxonomy is `category` (default)
+
+## Security Considerations
+
+<Warning>
+  The WordPress REST API exposes public content only by default. For authenticated requests or private content, implement JWT authentication or application passwords.
+</Warning>
+
+### Best Practices
+
+- Never expose WordPress admin credentials in frontend code
+- Use HTTPS for all API requests
+- Implement rate limiting on your WordPress server
+- Keep WordPress and plugins updated
+- Use a CDN for media files
+
+## Next Steps
+
+- [Customize your site](/guides/customization) branding and content
+- [Add new solutions](/guides/adding-solutions) to your catalog
+- [Deploy to production](/guides/deployment) with Vercel or Netlify

@@ -1,0 +1,178 @@
+---
+title: fetchWPPageBySlug
+description: Fetch a WordPress page by its slug
+---
+
+## Function Signature
+
+```typescript
+export async function fetchWPPageBySlug(slug: string): Promise<WPPage | null>
+```
+
+Fetches a single WordPress page from the CMS API using its slug identifier. This function retrieves the page with embedded media data and transforms it into the application's `WPPage` format.
+
+## Parameters
+
+<ParamField path="slug" type="string" required>
+  The URL-friendly slug of the WordPress page to fetch. The slug is automatically URL-encoded to handle special characters.
+</ParamField>
+
+## Return Type
+
+<ResponseField name="WPPage | null" type="Promise<WPPage | null>">
+  Returns a Promise that resolves to a `WPPage` object if found, or `null` if no page matches the slug.
+
+  <Expandable title="WPPage properties">
+    <ResponseField name="id" type="number">
+      Unique identifier for the WordPress page
+    </ResponseField>
+
+    <ResponseField name="title" type="string">
+      The page title with HTML tags stripped
+    </ResponseField>
+
+    <ResponseField name="slug" type="string">
+      URL-friendly slug for the page
+    </ResponseField>
+
+    <ResponseField name="content" type="string">
+      Full HTML content of the page
+    </ResponseField>
+
+    <ResponseField name="excerpt" type="string">
+      Short excerpt of the page content with HTML tags stripped
+    </ResponseField>
+
+    <ResponseField name="date" type="string">
+      Formatted publication date in Spanish locale (e.g., "3 mar 2026")
+    </ResponseField>
+
+    <ResponseField name="image" type="string">
+      URL of the featured image, empty string if not available
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Behavior
+
+- Makes a GET request to the WordPress REST API `/pages` endpoint
+- Includes `_embed` parameter to fetch related media data
+- URL-encodes the slug parameter for safe transmission
+- Returns `null` if no page is found with the given slug
+- Strips HTML tags from title and excerpt fields
+- Formats dates using Spanish locale (es-ES)
+- Returns empty string for image if featured media is not available
+- Throws an error if the API request fails
+
+## Error Handling
+
+Throws an error with the format:
+```typescript
+throw new Error(`WordPress API error: ${res.status}`);
+```
+
+## Usage Example
+
+### Basic Usage
+
+```typescript
+import { fetchWPPageBySlug } from '../lib/wordpress';
+import { WPPage } from '../types';
+
+const [page, setPage] = useState<WPPage | null>(null);
+const [loading, setLoading] = useState(true);
+const [notFound, setNotFound] = useState(false);
+
+useEffect(() => {
+  if (!slug) return;
+  setLoading(true);
+  setNotFound(false);
+
+  fetchWPPageBySlug(slug)
+    .then((wpPage) => {
+      if (wpPage) {
+        setPage(wpPage);
+      } else {
+        setNotFound(true);
+      }
+    })
+    .catch((err) => {
+      console.warn('Error fetching WP page:', err);
+      setNotFound(true);
+    })
+    .finally(() => setLoading(false));
+}, [slug]);
+```
+
+### With Null Checking
+
+```typescript
+import { fetchWPPageBySlug } from '../lib/wordpress';
+
+const page = await fetchWPPageBySlug('about-us');
+
+if (page) {
+  console.log(`Found page: ${page.title}`);
+  console.log(`Content length: ${page.content.length}`);
+} else {
+  console.log('Page not found');
+}
+```
+
+### Router Integration
+
+```typescript
+import { useParams } from 'react-router-dom';
+import { fetchWPPageBySlug } from '../lib/wordpress';
+
+export const PageDetail: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [page, setPage] = useState<WPPage | null>(null);
+
+  useEffect(() => {
+    if (!slug) return;
+    
+    fetchWPPageBySlug(slug)
+      .then(setPage)
+      .catch(console.error);
+  }, [slug]);
+
+  if (!page) return <NotFound />;
+  
+  return <div>{page.title}</div>;
+};
+```
+
+### With Try-Catch
+
+```typescript
+import { fetchWPPageBySlug } from '../lib/wordpress';
+
+try {
+  const page = await fetchWPPageBySlug('privacy-policy');
+  
+  if (!page) {
+    // Handle 404 case
+    return <NotFoundPage />;
+  }
+  
+  // Use page data
+  return <PageContent page={page} />;
+} catch (error) {
+  // Handle API error
+  console.error('Failed to fetch page:', error);
+  return <ErrorPage />;
+}
+```
+
+## API Endpoint
+
+The function connects to:
+```
+https://cms.gobigagency.co/vencol/wp-json/wp/v2/pages?slug={encodedSlug}&_embed
+```
+
+## Related
+
+- [fetchBlogPosts](/api/wordpress/fetch-blog-posts) - Fetch multiple blog posts
+- [WPPage Type](/api/types#wppage) - Type definition for WordPress page objects

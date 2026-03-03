@@ -1,0 +1,356 @@
+---
+title: Routing & Navigation
+description: Learn about React Router setup, route configuration, and navigation patterns in the VENCOL Front Template
+---
+
+## Routing Overview
+
+The VENCOL Front Template uses **React Router v6** for client-side routing, providing a seamless single-page application experience.
+
+## Router Configuration
+
+### Main Router Setup
+
+The application uses `BrowserRouter` as the main router component in `App.tsx`:
+
+```tsx App.tsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+function App() {
+  return (
+    <Router>
+      <ScrollToTop />
+      <div className="min-h-screen bg-brand-dark">
+        <BackgroundBlobs />
+        <Navbar />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/nosotros" element={<About />} />
+            <Route path="/soluciones/:slug" element={<SolutionDetail />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/contacto" element={<Contact />} />
+            {/* Catch-all: WordPress pages by slug — must be last */}
+            <Route path="/:slug" element={<PageDetail />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+```
+
+<Warning>
+  The catch-all route `/:slug` must be defined **last** to prevent it from intercepting other routes. This route handles dynamic WordPress pages.
+</Warning>
+
+## Route Definitions
+
+### Static Routes
+
+Static routes map directly to specific page components:
+
+| Route | Component | Description |
+|-------|-----------|-------------|
+| `/` | `Home` | Landing page with hero, about section, FAQs |
+| `/nosotros` | `About` | Company information page |
+| `/blog` | `Blog` | Blog listing page |
+| `/contacto` | `Contact` | Contact form page |
+
+### Dynamic Routes
+
+Dynamic routes use URL parameters to load specific content:
+
+#### Solution Details
+```tsx
+<Route path="/soluciones/:slug" element={<SolutionDetail />} />
+```
+
+**Usage:**
+- `/soluciones/refrigeracion-comercial`
+- `/soluciones/sistemas-hvac`
+
+**Accessing the parameter:**
+```tsx SolutionDetail.tsx
+import { useParams } from 'react-router-dom';
+
+const { slug } = useParams<{ slug: string }>();
+const solution = siteContent.solutions.items.find(s => s.slug === slug);
+```
+
+#### Blog Post Details
+```tsx
+<Route path="/blog/:slug" element={<BlogDetail />} />
+```
+
+**Usage:**
+- `/blog/post-title-here`
+
+#### WordPress Pages (Catch-all)
+```tsx
+<Route path="/:slug" element={<PageDetail />} />
+```
+
+This route fetches pages from WordPress CMS by slug:
+
+```tsx PageDetail.tsx
+import { useParams } from 'react-router-dom';
+import { fetchWPPageBySlug } from '../lib/wordpress';
+
+const { slug } = useParams<{ slug: string }>();
+
+useEffect(() => {
+  fetchWPPageBySlug(slug)
+    .then((wpPage) => {
+      if (wpPage) setPage(wpPage);
+      else setNotFound(true);
+    })
+    .catch(() => setNotFound(true));
+}, [slug]);
+```
+
+## Navigation Components
+
+### Navbar Navigation
+
+The `Navbar` component uses `NavLink` for active route highlighting:
+
+```tsx Navbar.tsx
+import { NavLink as RouterNavLink, Link } from 'react-router-dom';
+
+<RouterNavLink
+  to={link.path}
+  className={({ isActive }) => `
+    px-4 py-1.5 rounded-full text-md font-medium transition-all duration-300
+    ${isActive 
+      ? 'text-brand-green bg-white/10 shadow-[0_0_10px_rgba(74,222,128,0.1)]' 
+      : 'text-gray-300 hover:text-white hover:bg-white/5'}
+  `}
+>
+  {link.label}
+</RouterNavLink>
+```
+
+<Info>
+  `NavLink` automatically receives an `isActive` boolean in its className function, enabling active state styling.
+</Info>
+
+### Solutions Dropdown
+
+The navbar includes a dynamic dropdown for solutions:
+
+```tsx Navbar.tsx
+<div className="relative group">
+  <button className="flex items-center px-4 py-1.5 rounded-full">
+    Soluciones
+    <ChevronDown className="w-4 h-4 ml-1 group-hover:rotate-180 transition-transform" />
+  </button>
+  
+  <div className="dropdown-menu">
+    {solutionsData.map((solution) => (
+      <Link 
+        key={solution.id}
+        to={`/soluciones/${solution.slug}`}
+        className="block px-4 py-3 hover:text-white hover:bg-white/10"
+      >
+        <div className="font-semibold">{solution.title}</div>
+        <div className="text-xs text-glass-muted">{solution.description}</div>
+      </Link>
+    ))}
+  </div>
+</div>
+```
+
+### Programmatic Navigation
+
+Use the `Link` component for navigation:
+
+```tsx
+import { Link } from 'react-router-dom';
+
+// Basic link
+<Link to="/contacto" className="button">
+  Contact Us
+</Link>
+
+// Dynamic link
+<Link to={`/blog/${post.slug}`}>
+  Read More
+</Link>
+
+// Link with state
+<Link to="/contact" state={{ from: 'blog' }}>
+  Contact
+</Link>
+```
+
+## Scroll Behavior
+
+### Scroll to Top on Route Change
+
+The application implements automatic scroll-to-top on navigation:
+
+```tsx App.tsx
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  
+  return null;
+}
+```
+
+This component is placed inside the `Router` to access routing context:
+
+```tsx
+<Router>
+  <ScrollToTop />
+  {/* Rest of app */}
+</Router>
+```
+
+## Mobile Navigation
+
+### Mobile Menu State
+
+The navbar manages mobile menu state with automatic closing on route change:
+
+```tsx Navbar.tsx
+const [isOpen, setIsOpen] = useState(false);
+const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
+const location = useLocation();
+
+// Close mobile menu on route change
+useEffect(() => {
+  setIsOpen(false);
+  setMobileSolutionsOpen(false);
+}, [location]);
+```
+
+### Mobile Dropdown
+
+The mobile menu includes an expandable solutions section:
+
+```tsx Navbar.tsx
+<button 
+  onClick={() => setMobileSolutionsOpen(!mobileSolutionsOpen)}
+  className="w-full flex items-center justify-between"
+>
+  Soluciones
+  <ChevronDown className={`transition-transform ${
+    mobileSolutionsOpen ? 'rotate-180' : ''
+  }`} />
+</button>
+
+<div className={`overflow-hidden transition-all ${
+  mobileSolutionsOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+}`}>
+  {solutionsData.map((solution) => (
+    <Link to={`/soluciones/${solution.slug}`}>
+      {solution.menuTitle}
+    </Link>
+  ))}
+</div>
+```
+
+## Loading States
+
+Dynamic pages implement loading states during data fetching:
+
+```tsx PageDetail.tsx
+if (loading) {
+  return (
+    <div className="pt-48 pb-20">
+      <div className="animate-pulse space-y-8">
+        <div className="h-8 bg-white/10 rounded w-1/3" />
+        <div className="h-[40vh] bg-white/5 rounded-2xl" />
+      </div>
+    </div>
+  );
+}
+```
+
+## 404 Handling
+
+### WordPress Page Not Found
+
+The `PageDetail` component handles missing pages:
+
+```tsx PageDetail.tsx
+if (notFound || !page) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <SEO title="Página no encontrada" />
+      <div className="text-center">
+        <h2 className="text-3xl font-bold mb-4">Página no encontrada</h2>
+        <p className="text-glass-muted mb-6">
+          La página que buscas no existe o ha sido movida.
+        </p>
+        <Link to="/" className="text-brand-green hover:underline">
+          <ArrowLeft className="w-4 h-4" />
+          Volver al Inicio
+        </Link>
+      </div>
+    </div>
+  );
+}
+```
+
+## Navigation Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Link for Internal Navigation">
+    Always use React Router's `Link` component instead of `<a>` tags for internal navigation. This prevents full page reloads and maintains SPA behavior.
+    
+    ```tsx
+    // Good
+    <Link to="/about">About</Link>
+    
+    // Bad
+    <a href="/about">About</a>
+    ```
+  </Accordion>
+  
+  <Accordion title="Dynamic Route Parameters">
+    Extract route parameters using `useParams` hook:
+    
+    ```tsx
+    const { slug } = useParams<{ slug: string }>();
+    ```
+    
+    Always provide TypeScript types for parameters.
+  </Accordion>
+  
+  <Accordion title="Route Order Matters">
+    Place catch-all routes last in the Routes configuration to prevent them from intercepting more specific routes.
+  </Accordion>
+  
+  <Accordion title="Active State Styling">
+    Use `NavLink` instead of `Link` when you need to style the active route:
+    
+    ```tsx
+    <NavLink 
+      to="/blog"
+      className={({ isActive }) => 
+        isActive ? 'active-class' : 'inactive-class'
+      }
+    />
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Related Topics
+
+<CardGroup cols={2}>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    Learn about the overall application structure
+  </Card>
+  
+  <Card title="WordPress Integration" icon="wordpress" href="/concepts/wordpress-integration">
+    Understand how dynamic pages are loaded from WordPress
+  </Card>
+</CardGroup>

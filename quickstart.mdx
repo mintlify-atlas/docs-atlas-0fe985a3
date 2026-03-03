@@ -1,80 +1,319 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: "Quickstart Guide"
+description: "Get the VENCOL Front Template up and running in 5 minutes. A quick walkthrough from installation to your first customization."
 ---
 
-## Get started in three steps
+# Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
+Get your VENCOL Front Template development environment running in just 5 minutes. This guide will walk you through installation, running the dev server, and making your first customizations.
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+Before you begin, ensure you have:
+
+- **Node.js 16+** installed (18.x or 20.x LTS recommended)
+- A package manager: **npm**, **pnpm**, or **yarn**
+- A code editor (VS Code recommended)
+- Basic knowledge of React and TypeScript
+
+## Quick Start
+
+<Steps>
+  <Step title="Clone and Install">
+    Clone the repository and install dependencies:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    <CodeGroup>
+    ```bash npm
+    git clone https://github.com/Mich9025/vencol-front.git
+    cd vencol-front
+    npm install
+    ```
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    ```bash pnpm
+    git clone https://github.com/Mich9025/vencol-front.git
+    cd vencol-front
+    pnpm install
+    ```
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash yarn
+    git clone https://github.com/Mich9025/vencol-front.git
+    cd vencol-front
+    yarn install
+    ```
+    </CodeGroup>
+    
+    This installs all dependencies from `package.json:11-23`:
+    - React 18.3.1 and React DOM
+    - React Router 6.22.3 for navigation
+    - Lucide React 0.358.0 for icons
+    - React Helmet Async 2.0.4 for SEO
+    - Vite 6.2.0 and TypeScript 5.8.2
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Start Development Server">
+    Launch the Vite development server:
+    
+    <CodeGroup>
+    ```bash npm
+    npm run dev
+    ```
+    
+    ```bash pnpm
+    pnpm run dev
+    ```
+    
+    ```bash yarn
+    yarn dev
+    ```
+    </CodeGroup>
+    
+    The application will start at `http://localhost:3000` (configured in `vite.config.ts:9`).
+    
+    <Note>
+      The default Vite port is 5173, but this project is configured to use port 3000 for consistency with traditional React apps.
+    </Note>
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Explore the Application">
+    Open your browser to `http://localhost:3000` and explore:
+    
+    - **Home Page** - Hero slider, features showcase, partners marquee, FAQ
+    - **Nosotros** - About page with company information
+    - **Soluciones** - Product catalog dropdown (5 solution categories)
+    - **Blog** - WordPress-integrated blog listing
+    - **Contacto** - Contact information and forms
+  </Step>
+</Steps>
 
-### Step 3: Go live
+## Project Structure Overview
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+Understanding the basic structure helps you navigate the codebase:
 
-## Next steps
+```
+vencol-front/
+├── components/          # Reusable UI components
+│   ├── Navbar.tsx      # Navigation with dropdowns
+│   ├── Footer.tsx      # Site footer
+│   ├── SEO.tsx         # SEO meta tags
+│   └── ui/             # Base components (GlassCard, BackgroundBlobs)
+├── pages/              # Route page components
+│   ├── Home.tsx        # Landing page
+│   ├── About.tsx       # About page
+│   ├── SolutionDetail.tsx  # Individual solution pages
+│   ├── Blog.tsx        # Blog listing
+│   └── Contact.tsx     # Contact page
+├── data/               # Static content and configuration
+│   ├── data.tsx        # Site-wide content
+│   └── solutions.tsx   # Solutions catalog
+├── lib/                # Utilities
+│   └── wordpress.ts    # WordPress API integration
+├── App.tsx             # Main app with routing
+├── index.tsx           # Entry point
+└── types.ts            # TypeScript definitions
+```
 
-Now that you have your docs running, explore these key features:
+## Your First Customization
+
+Let's make a simple customization to see how the app works.
+
+### 1. Update the Hero Title
+
+Open `data/data.tsx` and find the home hero section:
+
+```typescript data/data.tsx
+export const siteContent = {
+  // ... other content
+  home: {
+    hero: {
+      badge: "Soluciones de Empaque de Clase Mundial",
+      title: {
+        prefix: "Hacemos visible",
+        highlight: "la frescura",
+        suffix: "de tus productos"
+      },
+      // ... more properties
+    }
+  }
+}
+```
+
+Change the `highlight` text to something else, save the file, and watch the browser auto-reload with your changes thanks to Vite's Hot Module Replacement (HMR).
+
+### 2. Change Brand Colors
+
+The brand color is defined in `index.html:22-26` within the `<style>` tag:
+
+```html index.html
+<style type="text/tailwindcss">
+  @layer utilities {
+    .brand-green { color: #56B501; }
+    .bg-brand-green { background-color: #56B501; }
+    /* ... */
+  }
+</style>
+```
+
+Update `#56B501` to your preferred brand color. The change will apply across all buttons, highlights, and accents.
+
+### 3. Add a New Solution
+
+Add a new product to the solutions catalog by editing `data/solutions.tsx`:
+
+```typescript data/solutions.tsx
+import { Zap } from 'lucide-react'; // Import an icon
+
+export const solutionsData: Service[] = [
+  // ... existing solutions
+  {
+    id: '6',
+    slug: 'my-new-solution',
+    title: "My New Solution",
+    description: "Short description for the card",
+    longDescription: "Full description for the detail page...",
+    icon: Zap,
+    features: [
+      "Feature 1",
+      "Feature 2",
+      "Feature 3"
+    ],
+    image: "https://images.unsplash.com/photo-1234567890",
+    subtitle1: "First Subtitle",
+    subtitle1Description: "Description for first section",
+    subtitle2: "Second Subtitle",
+    subtitle2Description: "Description for second section",
+    menuTitle: "My Solution"
+  }
+];
+```
+
+The new solution will automatically appear in the navigation dropdown and be accessible at `/soluciones/my-new-solution`.
+
+<Tip>
+  For a complete guide on adding solutions, see [Adding Solutions](/guides/adding-solutions).
+</Tip>
+
+## Available Scripts
+
+The project includes these npm scripts from `package.json:6-9`:
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with HMR at `localhost:3000` |
+| `npm run build` | Build production bundle to `dist/` directory |
+| `npm run preview` | Preview production build locally |
+
+## Understanding the Routing
+
+The app uses React Router 6 for client-side navigation. Routes are defined in `App.tsx:30-40`:
+
+```tsx App.tsx
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/nosotros" element={<About />} />
+  <Route path="/soluciones/:slug" element={<SolutionDetail />} />
+  <Route path="/blog" element={<Blog />} />
+  <Route path="/blog/:slug" element={<BlogDetail />} />
+  <Route path="/contacto" element={<Contact />} />
+  {/* Catch-all for WordPress pages */}
+  <Route path="/:slug" element={<PageDetail />} />
+</Routes>
+```
+
+Key routes:
+- **Static routes**: `/`, `/nosotros`, `/blog`, `/contacto`
+- **Dynamic routes**: `/soluciones/:slug` for products, `/blog/:slug` for posts
+- **Catch-all**: `/:slug` fetches WordPress pages by slug
+
+## WordPress Integration
+
+The app can fetch blog posts from a WordPress site via REST API. The configuration is in `lib/wordpress.ts:3`:
+
+```typescript lib/wordpress.ts
+const WP_API_URL = 'https://cms.gobigagency.co/vencol/wp-json/wp/v2';
+```
+
+To use your own WordPress site:
+
+1. Update the `WP_API_URL` in `lib/wordpress.ts`
+2. Ensure your WordPress site has REST API enabled
+3. Blog posts will automatically load from your WordPress backend
+
+<Warning>
+  If the WordPress API fails, the app gracefully falls back to static blog posts defined in `data/data.tsx`.
+</Warning>
+
+## Next Steps
+
+Now that you have the basics running:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Explore Components" icon="puzzle-piece" href="/components/overview">
+    Learn about Navbar, Footer, SEO, and UI components
+  </Card>
+  
+  <Card title="Understand Architecture" icon="sitemap" href="/concepts/architecture">
+    Dive into the project structure and data flow
+  </Card>
+  
+  <Card title="Customize Your Site" icon="palette" href="/guides/customization">
+    Personalize colors, content, and branding
+  </Card>
+  
+  <Card title="Deploy to Production" icon="rocket" href="/guides/deployment">
+    Deploy to Vercel or Netlify in minutes
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Port 3000 is already in use">
+    If another app is using port 3000, you can change the port in `vite.config.ts:9`:
+    
+    ```typescript vite.config.ts
+    export default defineConfig({
+      server: {
+        port: 3001, // Change to any available port
+      },
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Module not found errors">
+    Clear your `node_modules` and reinstall:
+    
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+
+  <Accordion title="TypeScript errors in editor">
+    Ensure your editor uses the workspace TypeScript version. In VS Code:
+    
+    1. Open any `.tsx` file
+    2. Press `Cmd/Ctrl + Shift + P`
+    3. Type "Select TypeScript Version"
+    4. Choose "Use Workspace Version"
+  </Accordion>
+
+  <Accordion title="WordPress blog not loading">
+    The app falls back to static content if WordPress is unavailable. Check:
+    
+    1. WordPress URL is correct in `lib/wordpress.ts:3`
+    2. WordPress REST API is enabled
+    3. CORS is configured on WordPress (if needed)
+    
+    See [WordPress Setup Guide](/guides/wordpress-setup) for details.
+  </Accordion>
+</AccordionGroup>
+
+## Getting Help
+
+- **Documentation**: Browse the full docs for detailed guides
+- **Source Code**: Explore `~/workspace/source/` for implementation details
+- **GitHub**: Report issues at [github.com/Mich9025/vencol-front](https://github.com/Mich9025/vencol-front)
+
+<Card title="Ready to dive deeper?" icon="book">
+  Check out the [Core Concepts](/concepts/architecture) to understand the full architecture.
+</Card>

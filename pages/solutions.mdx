@@ -1,0 +1,421 @@
+---
+title: Solution Detail Page Component
+description: Documentation for the SolutionDetail page component that displays individual product/service information.
+---
+
+# Solution Detail Page Component
+
+The SolutionDetail page (`pages/SolutionDetail.tsx`) displays detailed information about individual products or services offered by VENCOL.
+
+## Purpose
+
+This dynamic page component:
+
+- Displays comprehensive information about a specific solution
+- Showcases product features and benefits
+- Provides visual content through image galleries
+- Includes call-to-action for quotes and inquiries
+- Handles routing for different solutions via URL slugs
+
+## Data Sources
+
+### URL Parameters
+
+The page uses React Router's `useParams` hook to get the solution slug:
+
+```typescript
+import { useParams } from 'react-router-dom';
+
+const { slug } = useParams<{ slug: string }>();
+const solution = siteContent.solutions.items.find(s => s.slug === slug);
+```
+
+### Static Content
+
+```typescript
+import { siteContent } from '../data/data';
+
+// Solution data structure
+interface Service {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;              // Short description
+  longDescription: string;          // Full description
+  subtitle1: string;
+  subtitle1Description: string;
+  subtitle2: string;
+  subtitle2Description: string;
+  icon: LucideIcon;
+  features: string[];               // Feature list
+  images: string[];                 // Gallery images
+  menuTitle: string;               // Navigation title
+}
+```
+
+**Location:** `types.ts:19-33`
+
+## Page Structure
+
+### 1. Hero Header
+
+Full-width header with solution title and icon:
+
+```typescript
+<div className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+  <div className="absolute inset-0 z-0">
+    <img 
+      src={solution.images[0]} 
+      alt={solution.title} 
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-brand-dark/80 backdrop-blur-[2px]"></div>
+    <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent"></div>
+  </div>
+
+  <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
+    <Link to="/" className="inline-flex items-center text-glass-muted hover:text-white">
+      <ArrowLeft className="w-4 h-4 mr-2" />
+      Volver al Inicio
+    </Link>
+    
+    <div className="bg-brand-green/20 p-4 rounded-2xl backdrop-blur-md border border-brand-green/30">
+      <solution.icon className="h-16 w-16 text-brand-green" />
+    </div>
+    
+    <h1>{solution.title}</h1>
+    <p>{solution.description}</p>
+  </div>
+</div>
+```
+
+**Location:** `pages/SolutionDetail.tsx:40-71`
+
+**Features:**
+- Background image from solution data
+- Multiple overlay layers for depth
+- Icon display with brand styling
+- Back navigation button
+- Responsive text sizing
+
+### 2. Content Section
+
+Three-column grid layout with main content and sidebar:
+
+**Main Content (2/3 width):**
+
+```typescript
+<div className="lg:col-span-2 space-y-8">
+  <GlassCard className="p-8 md:p-10">
+    <h2>Descripción Detallada</h2>
+    
+    <h3>{solution.subtitle1}</h3>
+    <p>{solution.subtitle1Description}</p>
+    
+    <h3>{solution.subtitle2}</h3>
+    <p>{solution.subtitle2Description}</p>
+  </GlassCard>
+
+  {/* Image Gallery */}
+  <div className={`grid grid-cols-1 ${
+    solution.images.length > 1 ? 'md:grid-cols-2' : ''
+  } gap-6`}>
+    {solution.images.map((img, idx) => (
+      <div key={idx} className="rounded-2xl overflow-hidden h-64 group">
+        <img 
+          src={img} 
+          alt={`${solution.title} - ${idx + 1}`}
+          className="w-full h-full object-cover group-hover:grayscale-0 group-hover:scale-105"
+        />
+      </div>
+    ))}
+  </div>
+</div>
+```
+
+**Location:** `pages/SolutionDetail.tsx:79-106`
+
+**Sidebar (1/3 width):**
+
+```typescript
+<div className="lg:col-span-1 space-y-6">
+  <GlassCard className="bg-white/5 border-white/10 sticky top-24">
+    <h3>Características Clave</h3>
+    
+    <ul className="space-y-4">
+      {solution.features.map((feature, idx) => (
+        <li key={idx} className="flex items-start text-gray-300">
+          <div className="bg-brand-green/20 p-1 rounded-full">
+            <Check className="w-3 h-3 text-brand-green" />
+          </div>
+          <span>{feature}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div className="mt-8 pt-6 border-t border-white/10">
+      <h4>¿Interesado en este producto?</h4>
+      <p>Solicita una cotización o muestra técnica para tu operación.</p>
+      <Link to="/contacto" className="glass-button">
+        Cotizar Ahora
+        <Send className="w-4 h-4" />
+      </Link>
+    </div>
+  </GlassCard>
+</div>
+```
+
+**Location:** `pages/SolutionDetail.tsx:108-137`
+
+**Features:**
+- Sticky sidebar for easy access
+- Feature list with checkmark icons
+- CTA section with link to contact
+- Glassmorphic styling
+
+## Error Handling
+
+Handles invalid slugs gracefully:
+
+```typescript
+if (!solution) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <SEO title="Solución no encontrada" />
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">Solución no encontrada</h2>
+        <Link to="/" className="text-brand-green hover:underline">
+          Volver al Inicio
+        </Link>
+      </div>
+    </div>
+  );
+}
+```
+
+**Location:** `pages/SolutionDetail.tsx:19-29`
+
+## Routing & Navigation
+
+### URL Pattern
+
+```
+/soluciones/:slug
+```
+
+Example URLs:
+- `/soluciones/bolsas-termoencogibles`
+- `/soluciones/absorbentes`
+- `/soluciones/etiquetas`
+
+### Navigation Implementation
+
+```typescript
+import { useNavigate, useParams, Link } from 'react-router-dom';
+
+const { slug } = useParams<{ slug: string }>();
+const navigate = useNavigate();
+```
+
+**Navigation Elements:**
+- Back to home: `<Link to="/">Volver al Inicio</Link>`
+- Contact CTA: `<Link to="/contacto">Cotizar Ahora</Link>`
+
+## Scroll Behavior
+
+Scrolls to top when solution changes:
+
+```typescript
+import { useEffect } from 'react';
+
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, [slug]);
+```
+
+**Location:** `pages/SolutionDetail.tsx:15-17`
+
+## Components Used
+
+### GlassCard
+
+```typescript
+import { GlassCard } from '../components/ui/GlassCard';
+
+<GlassCard className="p-8 md:p-10">
+  {/* Content */}
+</GlassCard>
+```
+
+### SEO Component
+
+Dynamic SEO based on solution:
+
+```typescript
+import { SEO } from '../components/SEO';
+
+<SEO 
+  title={solution.title} 
+  description={solution.description} 
+  image={solution.images[0]} 
+  url={`${siteContent.meta.siteUrl}/soluciones/${solution.slug}`}
+/>
+```
+
+### Icons
+
+```typescript
+import { ArrowLeft, Check, Send } from 'lucide-react';
+```
+
+- `ArrowLeft` - Back navigation
+- `Check` - Feature list items
+- `Send` - CTA button
+- `solution.icon` - Dynamic icon from data
+
+## Responsive Design
+
+<Accordion title="Mobile (< 768px)">
+  - Single column layout
+  - Stacked content and sidebar
+  - Full-width images
+  - Reduced padding
+</Accordion>
+
+<Accordion title="Tablet (768px - 1024px)">
+  - Two-column image grid (if multiple images)
+  - Sidebar below content
+  - Medium padding
+</Accordion>
+
+<Accordion title="Desktop (> 1024px)">
+  - Three-column grid (2/3 content, 1/3 sidebar)
+  - Sticky sidebar at `top-24`
+  - Full padding and spacing
+  - Image grid responsive to count
+</Accordion>
+
+## Image Gallery Logic
+
+Adaptive grid based on image count:
+
+```typescript
+<div className={`grid grid-cols-1 ${
+  solution.images.length > 1 ? 'md:grid-cols-2' : ''
+} gap-6`}>
+  {solution.images.map((img, idx) => (
+    <div key={idx} className="rounded-2xl overflow-hidden h-64 border border-white/10 relative group">
+      <img 
+        src={img} 
+        alt={`${solution.title} - ${idx + 1}`} 
+        className="w-full h-full object-cover transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+    </div>
+  ))}
+</div>
+```
+
+- Single image: Full width
+- Multiple images: 2-column grid on medium+ screens
+
+## Styling Patterns
+
+### Glassmorphism
+
+```css
+bg-white/5
+border-white/10
+backdrop-blur-md
+```
+
+### Gradient Overlays
+
+```css
+/* Hero background */
+bg-gradient-to-t from-brand-dark via-transparent to-transparent
+
+/* Image gallery */
+bg-gradient-to-t from-black/60 to-transparent
+```
+
+### Hover Effects
+
+```typescript
+// Image hover
+group-hover:grayscale-0 group-hover:scale-105
+
+// Button hover
+hover:bg-white/20 transition-all
+```
+
+## Code Example
+
+<CodeGroup>
+
+```typescript Component Structure
+import React, { useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Check, Send } from 'lucide-react';
+import { GlassCard } from '../components/ui/GlassCard';
+import { siteContent } from '../data/data';
+import { SEO } from '../components/SEO';
+
+export const SolutionDetail: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const solution = siteContent.solutions.items.find(s => s.slug === slug);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
+  if (!solution) {
+    return <ErrorView />;
+  }
+
+  return (
+    <div className="relative z-10">
+      <SEO {...seoProps} />
+      <HeroSection solution={solution} />
+      <ContentSection solution={solution} />
+    </div>
+  );
+};
+```
+
+```typescript Features Sidebar
+<GlassCard className="bg-white/5 border-white/10 sticky top-24">
+  <h3 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">
+    Características Clave
+  </h3>
+  
+  <ul className="space-y-4">
+    {solution.features.map((feature, idx) => (
+      <li key={idx} className="flex items-start text-gray-300">
+        <div className="mt-1 mr-3 bg-brand-green/20 p-1 rounded-full flex-shrink-0">
+          <Check className="w-3 h-3 text-brand-green" />
+        </div>
+        <span className="text-sm leading-relaxed">{feature}</span>
+      </li>
+    ))}
+  </ul>
+
+  <div className="mt-8 pt-6 border-t border-white/10">
+    <h4 className="text-white font-bold mb-2">¿Interesado en este producto?</h4>
+    <p className="text-glass-muted text-sm mb-4">
+      Solicita una cotización o muestra técnica para tu operación.
+    </p>
+    <Link to="/contacto" className="glass-button">
+      Cotizar Ahora <Send className="w-4 h-4" />
+    </Link>
+  </div>
+</GlassCard>
+```
+
+</CodeGroup>
+
+## Related Pages
+
+- [Home Page](/pages/home) - Links to first solution from hero CTA
+- [Contact Page](/pages/contact) - Quote request destination
+- [Blog Page](/pages/blog) - Related content and articles

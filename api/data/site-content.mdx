@@ -1,0 +1,685 @@
+---
+title: siteContent Object
+description: Complete reference for the main site content configuration object containing all text, navigation, and data structures for the VENCOL Front Template.
+---
+
+# siteContent Object
+
+The `siteContent` object is the central data structure that powers the entire VENCOL Front Template. It contains all site metadata, brand information, navigation, and page-specific content organized in a hierarchical structure.
+
+## Location
+
+```
+source/data/data.tsx
+```
+
+## Import
+
+```tsx
+import { siteContent } from '@/data/data';
+```
+
+## Structure Overview
+
+The `siteContent` object is organized into the following top-level sections:
+
+- `meta` - SEO and site metadata
+- `brand` - Brand identity and contact information
+- `navigation` - Main navigation menu items
+- `header` - Header configuration
+- `home` - Home page content sections
+- `about` - About page content
+- `solutions` - Solutions page configuration and items
+- `blog` - Blog page configuration and posts
+- `contact` - Contact page content
+- `newsletter` - Newsletter subscription widget
+
+## Detailed Reference
+
+### meta
+
+SEO and metadata configuration for the entire site.
+
+```tsx
+siteContent.meta = {
+  siteUrl: string;           // Base URL of the site
+  siteName: string;          // Site name for meta tags
+  defaultImage: string;      // Default OG image URL
+  favicon: string;           // Favicon URL
+  titleTemplate: string;     // Template for page titles (use %s for page name)
+  defaultTitle: string;      // Default title when no page title provided
+  defaultDescription: string; // Default meta description
+}
+```
+
+**Example:**
+```tsx
+const pageTitle = siteContent.meta.titleTemplate.replace('%s', 'Inicio');
+// Result: "Inicio | Vencol - Frescura Visible"
+```
+
+### brand
+
+Brand identity, contact information, and social media links.
+
+```tsx
+siteContent.brand = {
+  name: string;
+  slogan: string;
+  description: string;
+  contact: {
+    email: string;
+    phone: string;
+    address: string;
+    locations: Array<{
+      country: string;
+      address: string;
+    }>;
+  };
+  social: {
+    whatsapp: string;
+    socialLinks: Array<{
+      label: string;
+      href: string;
+      icon: string; // 'facebook' | 'linkedin' | 'instagram' | 'tiktok'
+    }>;
+  };
+}
+```
+
+**Example Usage:**
+```tsx
+import { Mail } from 'lucide-react';
+
+function ContactButton() {
+  return (
+    <a href={`mailto:${siteContent.brand.contact.email}`}>
+      <Mail className="w-4 h-4" />
+      {siteContent.brand.contact.email}
+    </a>
+  );
+}
+```
+
+### navigation
+
+Main navigation menu configuration.
+
+```tsx
+siteContent.navigation: Array<{
+  label: string;
+  path: string;
+}>
+```
+
+**Example:**
+```tsx
+function NavMenu() {
+  return (
+    <nav>
+      {siteContent.navigation.map((item) => (
+        <Link key={item.path} href={item.path}>
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+```
+
+### header
+
+Header component configuration.
+
+```tsx
+siteContent.header = {
+  logo: string; // Logo image URL
+  cta: {
+    label: string;
+    path: string;
+  };
+}
+```
+
+### home
+
+All content sections for the home page.
+
+#### home.meta
+
+```tsx
+siteContent.home.meta = {
+  title: string;
+  description: string;
+}
+```
+
+#### home.hero
+
+```tsx
+siteContent.home.hero = {
+  badge: string;
+  title: {
+    prefix: string;
+    highlight: string;
+    suffix: string;
+  };
+  description: string;
+  cta: {
+    primary: string;
+    secondary: string;
+  };
+  images: string[]; // Array of image URLs
+}
+```
+
+**Example:**
+```tsx
+function HeroTitle() {
+  const { prefix, highlight, suffix } = siteContent.home.hero.title;
+  return (
+    <h1>
+      {prefix} <span className="text-brand-green">{highlight}</span> {suffix}
+    </h1>
+  );
+}
+```
+
+#### home.about
+
+```tsx
+siteContent.home.about = {
+  badge: string;
+  title: {
+    prefix: string;
+    highlight: string;
+    suffix: string;
+  };
+  description: string;
+  quote: string;
+  subDescription: string;
+  features: string[];
+  cta: string;
+  image: string;
+  experienceBadge: {
+    text: string;
+    value: string;
+  };
+}
+```
+
+#### home.partners
+
+```tsx
+siteContent.home.partners = {
+  stats: {
+    value: string;
+    text: string;
+  };
+  subtitle: string;
+  logos: string[]; // Partner logo URLs
+}
+```
+
+#### home.threePs
+
+The "3 Ps" section (Protección, Preservación, Presentación).
+
+```tsx
+siteContent.home.threePs = {
+  title: string;
+  subtitle: string;
+  items: Array<{
+    id: number;
+    icon: LucideIcon; // Icon component from lucide-react
+    iconColor: string; // Tailwind class
+    iconBg: string;    // Tailwind class
+    bgImage: string;
+    title: string;
+    description: string;
+    result: string;
+  }>;
+}
+```
+
+**Example:**
+```tsx
+function ThreePsSection() {
+  return (
+    <div className="grid grid-cols-3 gap-6">
+      {siteContent.home.threePs.items.map((item) => {
+        const Icon = item.icon;
+        return (
+          <div key={item.id}>
+            <div className={item.iconBg}>
+              <Icon className={item.iconColor} />
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+            <p className="font-semibold">{item.result}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+#### home.impact
+
+```tsx
+siteContent.home.impact = {
+  metrics: Array<{
+    value: string;
+    label: string;
+    subLabel: string;
+  }>;
+}
+```
+
+#### home.faq
+
+```tsx
+import { FaqItem } from '@/types';
+
+siteContent.home.faq = {
+  badge: string;
+  title: {
+    prefix: string;
+    highlight: string;
+    suffix: string;
+  };
+  description: string;
+  image: string;
+  cta: {
+    text: string;
+    linkText: string;
+  };
+  items: FaqItem[]; // Array of question/answer objects
+}
+
+type FaqItem = {
+  question: string;
+  answer: string;
+}
+```
+
+**Example:**
+```tsx
+function FAQ() {
+  return (
+    <div>
+      {siteContent.home.faq.items.map((faq, index) => (
+        <details key={index}>
+          <summary>{faq.question}</summary>
+          <p>{faq.answer}</p>
+        </details>
+      ))}
+    </div>
+  );
+}
+```
+
+#### home.testimonials
+
+```tsx
+siteContent.home.testimonials = {
+  badge: string;
+  title: {
+    prefix: string;
+    highlight: string;
+    suffix: string;
+  };
+  description: string;
+  items: Array<{
+    id: number;
+    name: string;
+    role: string;
+    company: string;
+    image: string;
+    text: string;
+    rating: number;
+  }>;
+  clients: string[]; // Client logo URLs
+}
+```
+
+#### home.blogPreview
+
+```tsx
+siteContent.home.blogPreview = {
+  title: string;
+  subtitle: string;
+  cta: string;
+  bgImage: string;
+}
+```
+
+### about
+
+Content for the About page.
+
+```tsx
+siteContent.about = {
+  meta: {
+    title: string;
+    description: string;
+  };
+  hero: {
+    badge: string;
+    title: string;
+    description: string;
+    image: string;
+  };
+}
+```
+
+### solutions
+
+Configuration and content for solutions/services.
+
+```tsx
+import { Service } from '@/types';
+
+siteContent.solutions = {
+  hero: {
+    title: string;
+    description: string;
+  };
+  custom: {
+    title: string;
+    description: string;
+    cta: string;
+  };
+  items: Service[]; // See Service type below
+}
+
+type Service = {
+  id: string;
+  slug: string;
+  title: string;
+  menuTitle?: string;
+  description: string;
+  longDescription: string;
+  subtitle1?: string;
+  subtitle1Description?: string;
+  subtitle2?: string;
+  subtitle2Description?: string;
+  icon: LucideIcon;
+  features: string[];
+  images: string[];
+}
+```
+
+**Example:**
+```tsx
+import { siteContent } from '@/data/data';
+
+function SolutionsGrid() {
+  return (
+    <div className="grid grid-cols-3 gap-8">
+      {siteContent.solutions.items.map((solution) => {
+        const Icon = solution.icon;
+        return (
+          <div key={solution.id}>
+            <Icon className="w-12 h-12" />
+            <h3>{solution.title}</h3>
+            <p>{solution.description}</p>
+            <Link href={`/soluciones/${solution.slug}`}>Ver más</Link>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+### blog
+
+Blog configuration and posts.
+
+```tsx
+import { BlogPost } from '@/types';
+
+siteContent.blog = {
+  meta: {
+    title: string;
+    description: string;
+  };
+  hero: {
+    title: string;
+    description: string;
+  };
+  posts: BlogPost[];
+}
+
+type BlogPost = {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string; // HTML string
+  date: string;
+  image: string;
+  category: string;
+}
+```
+
+**Example:**
+```tsx
+function BlogList() {
+  return (
+    <div>
+      {siteContent.blog.posts.map((post) => (
+        <article key={post.id}>
+          <img src={post.image} alt={post.title} />
+          <span className="text-sm">{post.category}</span>
+          <h2>{post.title}</h2>
+          <p>{post.excerpt}</p>
+          <time>{post.date}</time>
+          <Link href={`/blog/${post.slug}`}>Leer más</Link>
+        </article>
+      ))}
+    </div>
+  );
+}
+```
+
+### contact
+
+Contact page configuration.
+
+```tsx
+siteContent.contact = {
+  meta: {
+    title: string;
+    description: string;
+  };
+  hero: {
+    title: string;
+    description: string;
+    bgimage: string;
+    badge: string;
+  };
+  cards: Array<{
+    icon: LucideIcon;
+    title: string;
+    description: string;
+    action: string;
+    link: string;
+  }>;
+  coverage: {
+    title: string;
+    description: string;
+  };
+  form: {
+    title: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    topic: string;
+    message: string;
+    submit: string;
+  };
+  infoSection: {
+    title: string;
+    description: string;
+    badge: string;
+  };
+}
+```
+
+**Example:**
+```tsx
+function ContactCards() {
+  return (
+    <div className="grid grid-cols-2 gap-6">
+      {siteContent.contact.cards.map((card, index) => {
+        const Icon = card.icon;
+        return (
+          <a key={index} href={card.link}>
+            <Icon className="w-8 h-8" />
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+            <span>{card.action}</span>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+### newsletter
+
+Newsletter subscription widget configuration.
+
+```tsx
+siteContent.newsletter = {
+  title: string;
+  description: string;
+  placeholder: string;
+  buttonText: string;
+}
+```
+
+## Complete Type Definition
+
+For TypeScript projects, you can define the complete type:
+
+```tsx
+import { LucideIcon } from 'lucide-react';
+import { BlogPost, Service, FaqItem } from '@/types';
+
+type SiteContent = {
+  meta: {
+    siteUrl: string;
+    siteName: string;
+    defaultImage: string;
+    favicon: string;
+    titleTemplate: string;
+    defaultTitle: string;
+    defaultDescription: string;
+  };
+  brand: {
+    name: string;
+    slogan: string;
+    description: string;
+    contact: {
+      email: string;
+      phone: string;
+      address: string;
+      locations: Array<{
+        country: string;
+        address: string;
+      }>;
+    };
+    social: {
+      whatsapp: string;
+      socialLinks: Array<{
+        label: string;
+        href: string;
+        icon: string;
+      }>;
+    };
+  };
+  // ... (continue with other sections)
+};
+```
+
+## Usage Best Practices
+
+### 1. Destructuring for Cleaner Code
+
+```tsx
+const { hero, about, faq } = siteContent.home;
+
+function HomePage() {
+  return (
+    <>
+      <HeroSection data={hero} />
+      <AboutSection data={about} />
+      <FaqSection data={faq} />
+    </>
+  );
+}
+```
+
+### 2. Type-Safe Component Props
+
+```tsx
+type HeroSectionProps = {
+  data: typeof siteContent.home.hero;
+};
+
+function HeroSection({ data }: HeroSectionProps) {
+  return (
+    <section>
+      <span className="badge">{data.badge}</span>
+      <h1>
+        {data.title.prefix} 
+        <span className="highlight">{data.title.highlight}</span>
+        {data.title.suffix}
+      </h1>
+    </section>
+  );
+}
+```
+
+### 3. Dynamic Icon Rendering
+
+```tsx
+// Icons are Lucide React components stored in the data
+const Icon = siteContent.solutions.items[0].icon;
+<Icon className="w-6 h-6" />
+```
+
+### 4. SEO Meta Tags
+
+```tsx
+import Head from 'next/head';
+
+function SEOHead({ pageTitle }: { pageTitle?: string }) {
+  const { meta } = siteContent;
+  const title = pageTitle 
+    ? meta.titleTemplate.replace('%s', pageTitle)
+    : meta.defaultTitle;
+  
+  return (
+    <Head>
+      <title>{title}</title>
+      <meta name="description" content={meta.defaultDescription} />
+      <link rel="icon" href={meta.favicon} />
+      <meta property="og:image" content={meta.defaultImage} />
+    </Head>
+  );
+}
+```
+
+## Notes
+
+- All icons are imported from `lucide-react` at the top of the file
+- The data includes both English and Spanish text (primarily Spanish)
+- Images use external URLs (Unsplash, custom CMS)
+- HTML content in blog posts should be rendered with `dangerouslySetInnerHTML` or a safe HTML parser
+- The `Service` type is defined in `source/types` and used for both `siteContent.solutions.items` and the separate `solutionsData` array

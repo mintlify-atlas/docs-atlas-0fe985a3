@@ -1,0 +1,96 @@
+---
+title: Components Overview
+description: Overview of all React components available in the VENCOL Front Template
+---
+
+The VENCOL Front Template provides a comprehensive set of React components built with TypeScript, React Router, and Tailwind CSS. These components follow a glassmorphism design pattern with a dark theme and green accent colors.
+
+## Layout Components
+
+### Navbar
+A responsive navigation bar with dropdown support, scroll effects, and mobile menu functionality.
+
+- Fixed positioning with scroll-based styling
+- Desktop horizontal menu with centered layout
+- Mobile hamburger menu with slide-down panel
+- Dynamic solutions dropdown menu
+- Glass morphism effects
+
+[View Navbar Documentation](/components/navbar)
+
+### Footer
+A comprehensive footer component with brand information, contact details, locations, and social media links.
+
+- Multi-column responsive grid layout
+- Newsletter subscription form
+- Social media icon integration
+- Contact information display
+- Multiple location support
+
+[View Footer Documentation](/components/footer)
+
+## Utility Components
+
+### SEO
+A component for managing page metadata, Open Graph tags, and Twitter cards using react-helmet-async.
+
+- Dynamic title and description management
+- Open Graph meta tags
+- Twitter card support
+- Favicon configuration
+- Template-based title formatting
+
+[View SEO Documentation](/components/seo)
+
+## UI Components
+
+### GlassCard
+A reusable card component with glassmorphism effects and optional hover animations.
+
+- Customizable glass panel styling
+- Optional hover effects with scale and shadow
+- Flexible children support
+- Custom className override
+
+### BackgroundBlobs
+Decorative background gradient blobs for visual enhancement.
+
+- Fixed positioning overlay
+- Animated gradient spheres
+- Mix-blend modes for visual effects
+- Non-interactive (pointer-events-none)
+
+[View UI Components Documentation](/components/ui-components)
+
+## Design System
+
+All components follow a consistent design system:
+
+- **Colors**: Dark background (`brand-dark`), green accents (`brand-green`)
+- **Glass Effects**: Semi-transparent backgrounds with backdrop blur
+- **Typography**: Bold headings, medium body text
+- **Spacing**: Consistent padding and margins using Tailwind utilities
+- **Animations**: Smooth transitions and hover effects
+
+## Component Architecture
+
+Components are organized as follows:
+
+```
+components/
+├── Navbar.tsx          # Navigation component
+├── Footer.tsx          # Footer component
+├── SEO.tsx            # SEO meta tags component
+└── ui/
+    ├── GlassCard.tsx       # Glass card UI component
+    └── BackgroundBlobs.tsx # Background decoration
+```
+
+## Common Props Pattern
+
+Most components follow TypeScript best practices:
+
+- Explicit interface definitions for props
+- Optional props with default values
+- ReactNode for children composition
+- Proper TypeScript typing throughout

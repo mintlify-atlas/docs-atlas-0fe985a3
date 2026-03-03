@@ -1,0 +1,315 @@
+---
+title: Home Page Component
+description: Documentation for the Home page component, the main landing page of the VENCOL Front Template application.
+---
+
+# Home Page Component
+
+The Home page (`pages/Home.tsx`) serves as the main landing page for the VENCOL application, showcasing the company's services, impact, and testimonials through an engaging multi-section layout.
+
+## Purpose
+
+The Home page is the primary entry point for visitors and is designed to:
+
+- Present the company's value proposition through a hero section with image slider
+- Display company information and core values (3P's: Personas, Planeta, Producto)
+- Showcase partner logos and client testimonials
+- Provide FAQ section for common questions
+- Preview recent blog posts
+- Display key metrics and impact statistics
+
+## Data Sources
+
+The Home component pulls data from multiple sources:
+
+### Static Content
+
+```typescript
+import { siteContent } from '../data/data';
+
+const { home, meta } = siteContent;
+```
+
+The `siteContent.home` object contains:
+- `hero` - Hero section content (title, description, CTA buttons, images)
+- `about` - About section content
+- `partners` - Partner logos and statistics
+- `threePs` - The 3P's methodology items
+- `impact` - Metrics and impact statistics
+- `faq` - FAQ items
+- `testimonials` - Client testimonials
+- `blogPreview` - Blog preview section configuration
+
+### Dynamic Content (WordPress)
+
+```typescript
+import { fetchBlogPosts } from '../lib/wordpress';
+import { BlogPost } from '../types';
+
+const [blogPosts, setBlogPosts] = useState<BlogPost[]>(siteContent.blog.posts);
+
+useEffect(() => {
+  fetchBlogPosts()
+    .then((wpPosts) => {
+      if (wpPosts.length > 0) setBlogPosts(wpPosts);
+    })
+    .catch((err) => console.warn('WP blog fetch failed, using fallback:', err));
+}, []);
+```
+
+Blog posts are fetched from WordPress CMS at `https://cms.gobigagency.co/vencol/wp-json/wp/v2` with fallback to static data.
+
+## Key Features
+
+### 1. Hero Section with Image Slider
+
+Auto-rotating background images with parallax effect:
+
+```typescript
+const [currentImage, setCurrentImage] = useState(0);
+const [scrollY, setScrollY] = useState(0);
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    setCurrentImage((prev) => (prev + 1) % home.hero.images.length);
+  }, 5000);
+  return () => clearInterval(timer);
+}, [home.hero.images.length]);
+```
+
+**Location:** `pages/Home.tsx:51-102`
+
+### 2. About Section
+
+Features company information with:
+- Animated experience badge
+- Highlighted features list with checkmarks
+- Quote card with glassmorphic design
+- CTA button to About page
+
+**Location:** `pages/Home.tsx:104-186`
+
+### 3. Partners/Allies Marquee
+
+Infinite scrolling logo carousel:
+
+```typescript
+<div className="animate-marquee whitespace-nowrap flex gap-16 items-center py-4">
+  {[...Array(8)].map((_, i) => (
+    <React.Fragment key={i}>
+      {home.partners.logos.map((logo, index) => (
+        <div key={`p-${i}-${index}`} className="flex-shrink-0 w-32 h-32">
+          <img src={logo} alt="Partner Logo" />
+        </div>
+      ))}
+    </React.Fragment>
+  ))}
+</div>
+```
+
+**Location:** `pages/Home.tsx:188-218`
+
+### 4. The 3P's Section
+
+Displays three core principles (Personas, Planeta, Producto) using `GlassCard` components with background images.
+
+**Location:** `pages/Home.tsx:220-252`
+
+### 5. Impact Metrics
+
+Highlights key statistics in a gradient card:
+
+```typescript
+{home.impact.metrics.map((metric, idx) => (
+  <div key={idx}>
+    <span className="text-4xl lg:text-5xl font-bold">{metric.value}</span>
+    <p className="text-white font-semibold">{metric.label}</p>
+    <p className="text-emerald-100/60 text-xs">{metric.subLabel}</p>
+  </div>
+))}
+```
+
+**Location:** `pages/Home.tsx:254-275`
+
+### 6. FAQ Accordion
+
+Interactive FAQ section with expandable items:
+
+```typescript
+const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+const toggleFaq = (index: number) => {
+  setOpenFaqIndex(openFaqIndex === index ? null : index);
+};
+```
+
+**Location:** `pages/Home.tsx:277-347`
+
+### 7. Testimonials Section
+
+Displays client testimonials with star ratings and client logo marquee.
+
+**Location:** `pages/Home.tsx:349-422`
+
+### 8. Blog Preview
+
+Shows the 3 most recent blog posts with images and excerpts:
+
+```typescript
+<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+  {blogPosts.slice(0, 3).map((post) => (
+    <GlassCard key={post.id} hoverEffect>
+      <Link to={`/blog/${post.slug}`}>
+        <img src={post.image} alt={post.title} />
+        <h3>{post.title}</h3>
+        <p>{post.excerpt}</p>
+      </Link>
+    </GlassCard>
+  ))}
+</div>
+```
+
+**Location:** `pages/Home.tsx:424-481`
+
+## Components Used
+
+### GlassCard
+
+Used throughout for glassmorphic UI elements:
+
+```typescript
+import { GlassCard } from '../components/ui/GlassCard';
+
+<GlassCard className="bg-black/40" hoverEffect>
+  {/* Content */}
+</GlassCard>
+```
+
+### SEO Component
+
+Provides meta tags for search engines:
+
+```typescript
+import { SEO } from '../components/SEO';
+
+<SEO 
+  title={home.meta.title} 
+  description={home.meta.description} 
+  image={home.hero.images[0]}
+/>
+```
+
+### Icons
+
+Lucide React icons for visual elements:
+
+```typescript
+import { ArrowRight, CheckCircle2, Quote, Check, Sparkles, ChevronDown, 
+         MessageCircle, Star, MessageSquare, Shield } from 'lucide-react';
+```
+
+## Routing
+
+The Home page includes links to:
+
+- **Solutions:** `/soluciones/${slug}` - Links to first solution since general solutions page doesn't exist
+- **About:** `/nosotros` - Company information
+- **Contact:** `/contacto` - Contact form
+- **Blog:** `/blog` - Blog listing and `/blog/${slug}` - Individual posts
+
+## State Management
+
+```typescript
+const [currentImage, setCurrentImage] = useState(0);      // Hero slider
+const [scrollY, setScrollY] = useState(0);                // Parallax effect
+const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0); // FAQ accordion
+const [blogPosts, setBlogPosts] = useState<BlogPost[]>(siteContent.blog.posts); // Blog data
+```
+
+## Animations & Effects
+
+- **Parallax scrolling** on hero background
+- **Auto-rotating image slider** (5-second interval)
+- **Infinite marquee** for partner logos
+- **Hover effects** on cards and buttons
+- **Accordion animations** for FAQ items
+- **Gradient animations** on text and backgrounds
+
+## Code Pattern Example
+
+<CodeGroup>
+
+```typescript Hero Section
+<section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+  {/* Background Slider */}
+  <div 
+    className="absolute inset-0 z-0"
+    style={{ transform: `translateY(${scrollY * 0.5}px)` }}
+  >
+    {home.hero.images.map((img, index) => (
+      <div
+        key={index}
+        className={`absolute inset-0 transition-opacity duration-1000 ${
+          index === currentImage ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <img src={img} alt={`Slide ${index + 1}`} />
+        <div className="absolute inset-0 bg-brand-dark/70 backdrop-blur-[2px]"></div>
+      </div>
+    ))}
+  </div>
+
+  {/* Hero Content */}
+  <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+    <h1>{home.hero.title.prefix} <span>{home.hero.title.highlight}</span></h1>
+    <p>{home.hero.description}</p>
+    <Link to={`/soluciones/${siteContent.solutions.items[0].slug}`}>
+      {home.hero.cta.primary}
+    </Link>
+  </div>
+</section>
+```
+
+```typescript FAQ Accordion
+const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+const toggleFaq = (index: number) => {
+  setOpenFaqIndex(openFaqIndex === index ? null : index);
+};
+
+{home.faq.items.map((item, index) => {
+  const isOpen = openFaqIndex === index;
+  return (
+    <div 
+      key={index}
+      onClick={() => toggleFaq(index)}
+      className={`rounded-2xl p-6 cursor-pointer ${
+        isOpen ? 'bg-brand-green/20 border-brand-green/30' : 'bg-white/5'
+      }`}
+    >
+      <h3>{item.question}</h3>
+      <div className={`grid ${
+        isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+      }`}>
+        <p>{item.answer}</p>
+      </div>
+    </div>
+  );
+})}
+```
+
+</CodeGroup>
+
+## Performance Considerations
+
+- Blog posts are fetched asynchronously with fallback to static data
+- Images are loaded progressively with transition effects
+- Event listeners are properly cleaned up in useEffect returns
+- Marquee animations use CSS for better performance
+
+## Related Pages
+
+- [About Page](/pages/about) - Company information
+- [Solutions Page](/pages/solutions) - Product/service details
+- [Blog Page](/pages/blog) - Blog listing
+- [Contact Page](/pages/contact) - Contact form

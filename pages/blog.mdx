@@ -1,0 +1,465 @@
+---
+title: Blog Page Component
+description: Documentation for the Blog listing page component that displays articles and posts from WordPress CMS.
+---
+
+# Blog Page Component
+
+The Blog page (`pages/Blog.tsx`) displays a grid of blog posts fetched from a WordPress CMS with fallback to static data.
+
+## Purpose
+
+The Blog listing page:
+
+- Displays all available blog posts in a card grid layout
+- Fetches dynamic content from WordPress CMS
+- Provides fallback to static data if WordPress is unavailable
+- Links to individual blog post detail pages
+- Shows loading states during data fetch
+
+## Data Sources
+
+### WordPress CMS (Primary)
+
+Blog posts are fetched from WordPress REST API:
+
+```typescript
+import { fetchBlogPosts } from '../lib/wordpress';
+import { BlogPost } from '../types';
+
+const [posts, setPosts] = useState<BlogPost[]>(blog.posts);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  fetchBlogPosts()
+    .then((wpPosts) => {
+      if (wpPosts.length > 0) setPosts(wpPosts);
+    })
+    .catch((err) => console.warn('Error fetching WP posts, using fallback:', err))
+    .finally(() => setLoading(false));
+}, []);
+```
+
+**Location:** `pages/Blog.tsx:14-21`
+
+### WordPress API Details
+
+```typescript
+// lib/wordpress.ts
+const WP_API_URL = 'https://cms.gobigagency.co/vencol/wp-json/wp/v2';
+
+export async function fetchBlogPosts(perPage = 10): Promise<BlogPost[]> {
+  const res = await fetch(
+    `${WP_API_URL}/posts?per_page=${perPage}&_embed`
+  );
+
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+
+  const posts: WPPost[] = await res.json();
+  return posts.map(mapWPPostToBlogPost);
+}
+```
+
+**Location:** `lib/wordpress.ts:69-80`
+
+### Static Fallback Data
+
+If WordPress fetch fails, falls back to:
+
+```typescript
+import { siteContent } from '../data/data';
+
+const { blog } = siteContent;
+const [posts, setPosts] = useState<BlogPost[]>(blog.posts); // Initial state
+```
+
+### BlogPost Data Structure
+
+```typescript
+interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;     // Short description
+  content: string;     // Full HTML content
+  date: string;        // Formatted date
+  image: string;       // Featured image URL
+  category: string;    // Post category
+}
+```
+
+**Location:** `types.ts:8-17`
+
+## Page Structure
+
+### Hero Section
+
+Simple centered title and description:
+
+```typescript
+<div className="text-center mb-16">
+  <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+    {blog.hero.title}
+  </h1>
+  <p className="text-xl text-glass-muted">
+    {blog.hero.description}
+  </p>
+</div>
+```
+
+**Location:** `pages/Blog.tsx:32-37`
+
+### Loading State
+
+Skeleton cards displayed while fetching:
+
+```typescript
+{loading ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {[1, 2, 3].map((i) => (
+      <GlassCard key={i} className="p-0 overflow-hidden flex flex-col h-full animate-pulse">
+        <div className="h-56 bg-white/5" />
+        <div className="p-6 space-y-3">
+          <div className="h-3 bg-white/10 rounded w-1/4" />
+          <div className="h-5 bg-white/10 rounded w-3/4" />
+          <div className="h-3 bg-white/5 rounded w-full" />
+          <div className="h-3 bg-white/5 rounded w-2/3" />
+        </div>
+      </GlassCard>
+    ))}
+  </div>
+) : (
+  {/* Actual posts grid */}
+)}
+```
+
+**Location:** `pages/Blog.tsx:39-52`
+
+**Features:**
+- Pulse animation
+- Skeleton layout matches actual card
+- Shows 3 placeholder cards
+
+### Blog Posts Grid
+
+Responsive grid of blog post cards:
+
+```typescript
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {posts.map((post) => (
+    <Link key={post.id} to={`/blog/${post.slug}`} className="block h-full">
+      <GlassCard hoverEffect className="p-0 overflow-hidden flex flex-col group h-full">
+        {/* Image */}
+        <div className="relative h-56 overflow-hidden">
+          <img 
+            src={post.image} 
+            alt={post.title} 
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute top-4 right-4 bg-brand-green/90 px-3 py-1 rounded-full text-xs font-bold text-black uppercase tracking-wide">
+            {post.category}
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-6 flex-grow flex flex-col">
+          <div className="text-xs text-gray-400 mb-2">{post.date}</div>
+          <h3 className="text-xl font-bold text-white mb-3 group-hover:text-brand-green transition-colors">
+            {post.title}
+          </h3>
+          <p className="text-glass-muted text-sm line-clamp-3 mb-4 flex-grow">
+            {post.excerpt}
+          </p>
+          <span className="text-left text-brand-green text-sm font-semibold hover:text-white transition-colors mt-auto">
+            Leer artículo completo &rarr;
+          </span>
+        </div>
+      </GlassCard>
+    </Link>
+  ))}
+</div>
+```
+
+**Location:** `pages/Blog.tsx:54-80`
+
+## Components Used
+
+### GlassCard
+
+```typescript
+import { GlassCard } from '../components/ui/GlassCard';
+
+<GlassCard hoverEffect className="p-0 overflow-hidden flex flex-col group h-full">
+  {children}
+</GlassCard>
+```
+
+**Props Used:**
+- `hoverEffect={true}` - Enable hover animations
+- `className` - Removes default padding, enables flexbox
+
+### SEO Component
+
+```typescript
+import { SEO } from '../components/SEO';
+
+<SEO 
+  title={blog.meta.title} 
+  description={blog.meta.description} 
+/>
+```
+
+## State Management
+
+```typescript
+const [posts, setPosts] = useState<BlogPost[]>(blog.posts);
+const [loading, setLoading] = useState(true);
+```
+
+**State Flow:**
+1. Initial state: Static posts, loading = true
+2. useEffect triggers: Fetch WordPress posts
+3. On success: Update posts, set loading = false
+4. On error: Keep static posts, set loading = false
+
+## Data Fetching Flow
+
+<Steps>
+  <Step title="Component Mounts">
+    Initial render with static fallback posts and loading state = true
+  </Step>
+  
+  <Step title="useEffect Executes">
+    Calls `fetchBlogPosts()` from WordPress API
+  </Step>
+  
+  <Step title="API Response">
+    - **Success:** Update posts state with WordPress data
+    - **Error:** Keep fallback data, log warning to console
+  </Step>
+  
+  <Step title="Finally Block">
+    Set loading = false, triggering re-render with actual content
+  </Step>
+</Steps>
+
+## WordPress Data Mapping
+
+WordPress posts are transformed to match the BlogPost interface:
+
+```typescript
+// lib/wordpress.ts
+function mapWPPostToBlogPost(post: WPPost): BlogPost {
+  const featuredImage =
+    post._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+    'https://picsum.photos/400/250';
+
+  const category =
+    post._embedded?.['wp:term']?.[0]?.[0]?.name || 'General';
+
+  return {
+    id: post.id,
+    slug: post.slug,
+    title: stripHtml(post.title.rendered),
+    excerpt: stripHtml(post.excerpt.rendered),
+    content: post.content.rendered,
+    date: formatDate(post.date),
+    image: featuredImage,
+    category,
+  };
+}
+```
+
+**Location:** `lib/wordpress.ts:33-51`
+
+**Transformations:**
+- HTML stripping for title and excerpt
+- Date formatting to Spanish locale
+- Featured image extraction from embedded data
+- Category extraction from taxonomy
+
+## Routing
+
+### Blog Listing
+```
+/blog
+```
+
+### Individual Post
+```
+/blog/:slug
+```
+
+Example: `/blog/nuevas-tendencias-empaques-2024`
+
+## Responsive Grid Layout
+
+<Tabs>
+  <Tab title="Mobile (< 768px)">
+    ```css
+    grid-cols-1
+    ```
+    Single column, stacked cards
+  </Tab>
+  
+  <Tab title="Tablet (768px - 1024px)">
+    ```css
+    md:grid-cols-2
+    ```
+    Two columns side by side
+  </Tab>
+  
+  <Tab title="Desktop (> 1024px)">
+    ```css
+    lg:grid-cols-3
+    ```
+    Three columns for optimal viewing
+  </Tab>
+</Tabs>
+
+## Card Hover Effects
+
+```typescript
+// Image zoom on hover
+className="group-hover:scale-110 transition-transform duration-500"
+
+// Title color change
+className="group-hover:text-brand-green transition-colors"
+
+// Card elevation
+hoverEffect={true} // Adds translate-y and shadow effects
+```
+
+## Text Truncation
+
+Excerpts are limited to 3 lines:
+
+```css
+line-clamp-3
+```
+
+This Tailwind utility ensures consistent card heights.
+
+## Error Handling
+
+```typescript
+fetchBlogPosts()
+  .then((wpPosts) => {
+    if (wpPosts.length > 0) setPosts(wpPosts);
+  })
+  .catch((err) => console.warn('Error fetching WP posts, using fallback:', err))
+  .finally(() => setLoading(false));
+```
+
+<Warning>
+  Errors are caught silently and logged to console. The application continues to function with fallback static data.
+</Warning>
+
+## Styling Patterns
+
+### Category Badge
+
+```typescript
+<div className="absolute top-4 right-4 bg-brand-green/90 px-3 py-1 rounded-full text-xs font-bold text-black uppercase tracking-wide">
+  {post.category}
+</div>
+```
+
+### Gradient Overlays
+
+No gradient overlays used in blog listing (simple, clean design).
+
+### Glassmorphism
+
+```css
+/* Applied via GlassCard component */
+backdrop-blur-md
+bg-white/5
+border border-white/10
+```
+
+## Code Example
+
+<CodeGroup>
+
+```typescript Component Structure
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { GlassCard } from '../components/ui/GlassCard';
+import { siteContent } from '../data/data';
+import { SEO } from '../components/SEO';
+import { fetchBlogPosts } from '../lib/wordpress';
+import { BlogPost } from '../types';
+
+export const Blog: React.FC = () => {
+  const { blog } = siteContent;
+  const [posts, setPosts] = useState<BlogPost[]>(blog.posts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBlogPosts()
+      .then((wpPosts) => {
+        if (wpPosts.length > 0) setPosts(wpPosts);
+      })
+      .catch((err) => console.warn('Error fetching WP posts, using fallback:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div className="pt-48 pb-20 relative z-10">
+      <SEO title={blog.meta.title} description={blog.meta.description} />
+      <HeroSection />
+      {loading ? <LoadingGrid /> : <BlogGrid posts={posts} />}
+    </div>
+  );
+};
+```
+
+```typescript Blog Card Component
+<Link key={post.id} to={`/blog/${post.slug}`} className="block h-full">
+  <GlassCard hoverEffect className="p-0 overflow-hidden flex flex-col group h-full">
+    {/* Featured Image */}
+    <div className="relative h-56 overflow-hidden">
+      <img 
+        src={post.image} 
+        alt={post.title} 
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+      />
+      <div className="absolute top-4 right-4 bg-brand-green/90 px-3 py-1 rounded-full">
+        {post.category}
+      </div>
+    </div>
+    
+    {/* Content */}
+    <div className="p-6 flex-grow flex flex-col">
+      <div className="text-xs text-gray-400 mb-2">{post.date}</div>
+      <h3 className="text-xl font-bold text-white mb-3 group-hover:text-brand-green">
+        {post.title}
+      </h3>
+      <p className="text-glass-muted text-sm line-clamp-3 mb-4 flex-grow">
+        {post.excerpt}
+      </p>
+      <span className="text-brand-green text-sm font-semibold mt-auto">
+        Leer artículo completo &rarr;
+      </span>
+    </div>
+  </GlassCard>
+</Link>
+```
+
+</CodeGroup>
+
+## Performance Considerations
+
+- Posts fetched once on component mount
+- Loading state prevents layout shift
+- Images loaded lazily by browser
+- Fallback data ensures instant initial render
+
+## Related Pages
+
+- [Home Page](/pages/home) - Shows 3 most recent posts
+- Blog Detail Page - Individual post view (linked from cards)
+- WordPress CMS - Content management system

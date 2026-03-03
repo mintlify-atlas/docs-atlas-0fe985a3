@@ -1,0 +1,244 @@
+---
+title: Customization Guide
+description: Learn how to customize colors, content, branding, and site metadata for your VENCOL Front Template
+---
+
+This guide covers how to customize the visual appearance, branding, and content of your VENCOL Front Template application.
+
+## Overview
+
+All customization is centralized in the `data/data.tsx` file, making it easy to update branding, content, and metadata without touching component code.
+
+## Customizing Site Metadata
+
+Update SEO and browser metadata in the `meta` object:
+
+```tsx data/data.tsx
+export const siteContent = {
+  meta: {
+    siteUrl: "https://vencol-demo.vercel.app",
+    siteName: "Vencol",
+    defaultImage: "https://images.unsplash.com/photo-1542838132...",
+    favicon: "https://cdn-icons-png.flaticon.com/512/32/32223.png",
+    titleTemplate: "%s | Vencol - Frescura Visible",
+    defaultTitle: "Vencol - Tecnología de Empaque y Frescura",
+    defaultDescription: "Expertos en soluciones de empaque..."
+  },
+  // ...
+};
+```
+
+<Steps>
+  <Step title="Update Site URL">
+    Replace `siteUrl` with your production domain
+  </Step>
+  <Step title="Customize Titles">
+    Modify `titleTemplate` and `defaultTitle` to match your brand
+  </Step>
+  <Step title="Upload Favicon">
+    Replace the `favicon` URL with your brand's icon
+  </Step>
+  <Step title="Set Default Image">
+    Update `defaultImage` for social media sharing previews
+  </Step>
+</Steps>
+
+## Customizing Brand Identity
+
+Update your company information in the `brand` object:
+
+```tsx data/data.tsx
+brand: {
+  name: "VENCOL",
+  slogan: "Hacemos visible la frescura",
+  description: "Líderes en empaques sostenibles para alimentos...",
+  contact: {
+    email: "servicioalcliente@vencol.com",
+    phone: "+1 (786) 258-4495",
+    address: "Miami, FL",
+    locations: [
+      { country: "Colombia", address: "Carrera 69P #74B-71 Bogotá" },
+      { country: "USA", address: "8209 NW 70 St. Miami, FL 33166" }
+    ]
+  }
+}
+```
+
+<Note>
+  The `locations` array powers the coverage map on the contact page. Add or remove locations as needed.
+</Note>
+
+## Customizing the Logo
+
+Update the header logo in the `header` object:
+
+```tsx data/data.tsx
+header: {
+  logo: "https://vencol.com/wp-content/uploads/2024/12/LOGO-VENCOL-0437300-300x116.webp",
+  cta: {
+    label: "Contacto",
+    path: "/contacto"
+  }
+}
+```
+
+## Customizing Navigation
+
+Modify the main navigation menu:
+
+```tsx data/data.tsx
+navigation: [
+  { label: 'Inicio', path: '/' },
+  { label: 'Nosotros', path: '/nosotros' },
+  { label: 'Blog', path: '/blog' },
+]
+```
+
+<Warning>
+  The "Soluciones" dropdown is handled automatically by the component based on `solutionsData`. Don't add it manually to the navigation array.
+</Warning>
+
+## Customizing Social Media Links
+
+Update social media links in `brand.social`:
+
+```tsx data/data.tsx
+social: {
+  whatsapp: "+1 (786) 258-4495",
+  socialLinks: [
+    { label: "Facebook", href: "https://www.facebook.com/vencolcolombia/", icon: "facebook" },
+    { label: "Linkedin", href: "https://www.linkedin.com/company/103810333/", icon: "linkedin" },
+    { label: "Instagram", href: "https://www.instagram.com/vencol_internacional/", icon: "instagram" },
+    { label: "TikTok", href: "https://www.tiktok.com/@vencol_internacional", icon: "tiktok" }
+  ]
+}
+```
+
+## Customizing Home Page Content
+
+### Hero Section
+
+```tsx data/data.tsx
+home: {
+  hero: {
+    badge: "Tecnología de frescura",
+    title: {
+      prefix: "Hacemos visible la",
+      highlight: "frescura",
+      suffix: "de tus alimentos."
+    },
+    description: "La tecnología que controla bacterias...",
+    cta: {
+      primary: "Conoce nuestras soluciones",
+      secondary: "Hablemos"
+    },
+    images: [
+      "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-8-scaled.png",
+      "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/hero_2.webp"
+    ]
+  }
+}
+```
+
+### Impact Metrics
+
+```tsx data/data.tsx
+impact: {
+  metrics: [
+    { 
+      value: "+54 Millones", 
+      label: "Almohadillas distribuidas",
+      subLabel: "en Colombia en 2025" 
+    },
+    { 
+      value: "5 Países", 
+      label: "Cobertura Regional",
+      subLabel: "Exportando a Japón" 
+    }
+  ]
+}
+```
+
+<Note>
+  Keep metrics concise and impactful. Aim for 3-4 key metrics that demonstrate your value.
+</Note>
+
+## Customizing Colors
+
+While the template uses Tailwind CSS, you can customize brand colors by:
+
+1. **Using custom brand colors in data.tsx:**
+
+```tsx data/data.tsx
+threePs: {
+  items: [
+    {
+      iconColor: "text-blue-400",
+      iconBg: "bg-blue-500/20",
+      // ...
+    },
+    {
+      iconColor: "text-brand-green",
+      iconBg: "bg-brand-green/20",
+      // ...
+    }
+  ]
+}
+```
+
+2. **Extending Tailwind configuration** (create `tailwind.config.js` if it doesn't exist):
+
+```js tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        'brand-green': '#10b981',
+        'brand-blue': '#3b82f6',
+      }
+    }
+  }
+}
+```
+
+## Customizing FAQ Section
+
+```tsx data/data.tsx
+faq: {
+  badge: "Preguntas Frecuentes",
+  title: {
+    prefix: "Las preguntas más",
+    highlight: "comunes",
+    suffix: "de nuestros clientes."
+  },
+  items: [
+    {
+      question: "¿Para qué sirve exactamente la almohadilla?",
+      answer: "Es una tecnología de absorción diseñada para..."
+    }
+  ]
+}
+```
+
+## Best Practices
+
+<Steps>
+  <Step title="Test Locally">
+    Always test changes locally with `npm run dev` before deploying
+  </Step>
+  <Step title="Optimize Images">
+    Use WebP format and CDN URLs for better performance
+  </Step>
+  <Step title="Keep Consistent">
+    Maintain consistent tone and messaging across all content sections
+  </Step>
+  <Step title="SEO Friendly">
+    Update meta descriptions and titles for each page section
+  </Step>
+</Steps>
+
+## Next Steps
+
+- [Add new solutions](/guides/adding-solutions) to your catalog
+- [Configure WordPress integration](/guides/wordpress-setup) for blog content
+- [Deploy your site](/guides/deployment) to production
