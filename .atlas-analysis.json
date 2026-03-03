@@ -1,0 +1,114 @@
+{
+  "projectType": "frontend",
+  "projectName": "VENCOL Front Template",
+  "projectDescription": "Modern React web application for showcasing food packaging solutions, featuring product catalog, WordPress blog integration, and glassmorphism design.",
+  "theme": "palm",
+  "primaryColor": "#56B501",
+  "lightColor": "#84CC16",
+  "darkColor": "#3F7A00",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/architecture",
+              "concepts/routing",
+              "concepts/styling",
+              "concepts/wordpress-integration"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/overview",
+              "components/navbar",
+              "components/footer",
+              "components/seo",
+              "components/ui-components"
+            ]
+          },
+          {
+            "group": "Pages",
+            "pages": [
+              "pages/home",
+              "pages/about",
+              "pages/solutions",
+              "pages/blog",
+              "pages/contact"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/customization",
+              "guides/adding-solutions",
+              "guides/wordpress-setup",
+              "guides/deployment"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Types",
+            "pages": [
+              "api/types/nav-link",
+              "api/types/blog-post",
+              "api/types/service",
+              "api/types/wp-page"
+            ]
+          },
+          {
+            "group": "Data",
+            "pages": [
+              "api/data/site-content",
+              "api/data/solutions"
+            ]
+          },
+          {
+            "group": "WordPress API",
+            "pages": [
+              "api/wordpress/fetch-blog-posts",
+              "api/wordpress/fetch-wp-page"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "React + TypeScript with Vite",
+    "Glassmorphism design with Tailwind CSS",
+    "WordPress blog integration",
+    "Dynamic product catalog with detailed solution pages",
+    "SEO optimization with React Helmet Async",
+    "Responsive routing with React Router",
+    "Lucide React icon library",
+    "Animated UI components"
+  ],
+  "publicApiSurface": [
+    "siteContent (data object)",
+    "solutionsData (Service[])",
+    "fetchBlogPosts(perPage?: number): Promise<BlogPost[]>",
+    "fetchWPPageBySlug(slug: string): Promise<WPPage | null>",
+    "NavLink interface",
+    "BlogPost interface",
+    "Service interface",
+    "WPPage interface",
+    "Stat interface",
+    "FaqItem interface"
+  ]
+}
