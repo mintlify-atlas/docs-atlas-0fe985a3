@@ -1,0 +1,92 @@
+---
+title: Stat
+description: TypeScript interface for statistical metrics displayed on the VENCOL Front Template home page
+---
+
+## Overview
+
+The `Stat` interface represents a statistical metric or achievement displayed in the impact section of the home page. It provides a simple key-value structure for showcasing company metrics, achievements, or notable figures.
+
+## Type Definition
+
+```typescript
+export interface Stat {
+  value: string;
+  label: string;
+}
+```
+
+**Source:** `types.ts:35-38`
+
+## Properties
+
+<ParamField path="value" type="string" required>
+  The numerical or text value to display prominently (e.g., "10+", "500K+", "24/7").
+</ParamField>
+
+<ParamField path="label" type="string" required>
+  Descriptive label explaining what the value represents (e.g., "Years of Experience", "Happy Customers").
+</ParamField>
+
+## Usage Example
+
+From `data/data.tsx`, the home page impact section uses an array of Stat objects:
+
+```typescript data/data.tsx
+import { Stat } from '../types';
+
+export const siteContent = {
+  home: {
+    impact: {
+      stats: [
+        { value: "10+", label: "Años en el mercado" },
+        { value: "5", label: "Países atendidos" },
+        { value: "500+", label: "Clientes satisfechos" },
+        { value: "24/7", label: "Soporte técnico" }
+      ] as Stat[]
+    }
+  }
+};
+```
+
+### Rendering Stats
+
+The Home page (`pages/Home.tsx`) renders stats in a grid layout:
+
+```tsx pages/Home.tsx
+{home.impact.stats.map((stat, idx) => (
+  <div key={idx} className="text-center">
+    <div className="text-4xl md:text-5xl font-bold text-brand-green mb-2">
+      {stat.value}
+    </div>
+    <div className="text-gray-300 text-sm">
+      {stat.label}
+    </div>
+  </div>
+))}
+```
+
+## Best Practices
+
+<Tip>
+  Keep values concise and impactful. Use "+" suffixes ("100+") to indicate "or more" without exact numbers.
+</Tip>
+
+<Note>
+  Labels should be short phrases (2-4 words) that clearly explain the metric without additional context.
+</Note>
+
+## Related Types
+
+- [FaqItem](/api/types/faq-item) - FAQ question/answer pairs
+- [Service](/api/types/service) - Product/solution data structure
+
+## Common Stat Examples
+
+| Value | Label | Purpose |
+|-------|-------|--------|
+| `"10+"` | `"Años en el mercado"` | Company longevity |
+| `"5"` | `"Países atendidos"` | Geographic reach |
+| `"500+"` | `"Clientes satisfechos"` | Customer base size |
+| `"24/7"` | `"Soporte técnico"` | Service availability |
+| `"99%"` | `"Tasa de satisfacción"` | Quality metrics |

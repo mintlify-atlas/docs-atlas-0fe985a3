@@ -1,97 +1,142 @@
 ---
-title: solutionsData Array
-description: Reference for the standalone solutions data array containing product/service information for the VENCOL Front Template.
+title: Solutions Data
+description: Product solutions catalog data in siteContent.solutions.items containing detailed information for VENCOL packaging products
 ---
 
-# solutionsData Array
+# Solutions Data
 
-The `solutionsData` array is a standalone export containing detailed information about VENCOL's product and service solutions. This data structure is separate from `siteContent.solutions.items` but shares the same `Service` type structure.
+The solutions catalog is stored in `siteContent.solutions.items` and contains comprehensive product information for all VENCOL packaging solutions. This is the **active data source** used throughout the application.
+
+<Warning>
+  **Legacy File:** `data/solutions.tsx` exports `solutionsData` but this is **NOT USED** in the application. The actual source is `siteContent.solutions.items` in `data/data.tsx`.
+</Warning>
 
 ## Location
 
-```
-source/data/solutions.tsx
-```
+**File:** `data/data.tsx`  
+**Path:** `siteContent.solutions.items`
 
 ## Import
 
 ```tsx
-import { solutionsData } from '@/data/solutions';
+import { siteContent } from '@/data/data';
+
+const solutions = siteContent.solutions.items;
 ```
 
 ## Type Definition
 
-```tsx
-import { LucideIcon } from 'lucide-react';
-
+```typescript
 type Service = {
   id: string;
   slug: string;
   title: string;
+  menuTitle: string;
   description: string;
   longDescription: string;
+  subtitle1: string;
+  subtitle1Description: string;
+  subtitle2: string;
+  subtitle2Description: string;
   icon: LucideIcon;
   features: string[];
-  image: string;
+  images: string[];
 }
 
-const solutionsData: Service[];
+type Solutions = {
+  hero: {
+    title: string;
+    description: string;
+  };
+  custom: {
+    title: string;
+    description: string;
+    cta: string;
+  };
+  items: Service[];
+}
 ```
 
-## Data Structure
+## Structure
 
-### Service Object Properties
+### Hero Section
+
+```typescript
+siteContent.solutions.hero = {
+  title: "Nuestras Soluciones",
+  description: "Tecnología avanzada para cada etapa del proceso, desde la planta hasta la vitrina."
+}
+```
+
+### Custom Solutions CTA
+
+```typescript
+siteContent.solutions.custom = {
+  title: "¿Necesitas una solución personalizada?",
+  description: "Realizamos diagnósticos en planta, calibración de equipos y optimización de rentabilidad...",
+  cta: "Solicitar Evaluación"
+}
+```
+
+### Solutions Items
+
+The `items` array contains 5 complete Service objects. Each solution includes:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `id` | `string` | Unique identifier (e.g., '1', '2', '3') |
+| `id` | `string` | Unique identifier |
 | `slug` | `string` | URL-friendly identifier for routing |
-| `title` | `string` | Display title of the solution |
+| `title` | `string` | Full product title |
+| `menuTitle` | `string` | Shorter title for navigation menus |
 | `description` | `string` | Short description (1-2 sentences) |
-| `longDescription` | `string` | Detailed description (multiple paragraphs) |
-| `icon` | `LucideIcon` | Icon component from lucide-react |
-| `features` | `string[]` | Array of key features/benefits |
-| `image` | `string` | Main image URL for the solution |
+| `longDescription` | `string` | Extended description |
+| `subtitle1` | `string` | First content section heading |
+| `subtitle1Description` | `string` | First section detailed content |
+| `subtitle2` | `string` | Second content section heading |
+| `subtitle2Description` | `string` | Second section detailed content |
+| `icon` | `LucideIcon` | React component from lucide-react |
+| `features` | `string[]` | Array of key features (5 items) |
+| `images` | `string[]` | Array of product images (2-4 images) |
 
 ## Available Solutions
 
-The `solutionsData` array contains 5 solutions:
-
-### 1. Bolsas Termoencogibles Cryovac
+### 1. Bolsas/fundas termoencogibles Cryovac
 
 ```tsx
 {
   id: '1',
   slug: 'bolsas-termoencogibles-cryovac',
-  title: "Bolsas Termoencogibles Cryovac",
+  title: "Bolsas/fundas termoencogibles Cryovac",
+  menuTitle: "Bolsas/fundas termoencogibles",
   description: "Seguridad alimentaria de alto rendimiento. Barrera superior contra oxígeno y humedad.",
+  longDescription: "Las bolsas termoencogibles Cryovac representan el estándar de oro en la industria del empaque de proteínas...",
+  subtitle1: "Barrera superior contra oxígeno y humedad.",
+  subtitle1Description: "Nuestras soluciones de empaque te brindan una barrera técnica superior...",
+  subtitle2: "Innovación para tu Conservación y Calidad.",
+  subtitle2Description: "Diseñadas para una amplia gama de alimentos...",
   icon: Package,
-  features: [
-    "Alta barrera al oxígeno para prevenir la oxidación.",
-    "Encogimiento superior para una presentación sin arrugas.",
-    "Resistencia extrema a la punción y al abuso en transporte.",
-    "Compatibles con sistemas de vacío rotativos y de cámara.",
-    "Disponibles en múltiples calibres según el tipo de hueso o corte."
+  features: [/* 5 features */],
+  images: [
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-1-scaled.png",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/Productos-Cryovac.webp"
   ]
 }
 ```
 
-### 2. Film de Empaque Termoformado
+### 2. Film de Empaque Termoformado Cryovac
 
 ```tsx
 {
   id: '2',
   slug: 'film-termoformado',
-  title: "Film de Empaque Termoformado",
-  description: "Tecnología de vanguardia. Selladura hermética y resistencia mecánica superior.",
-  icon: Layers,
-  features: [
-    "Formabilidad excepcional para cavidades profundas.",
-    "Sellado hermético incluso con contaminantes en el área de sellado.",
-    "Propiedades antifog (anti-vaho) para máxima claridad.",
-    "Estructuras de alta barrera para atmósfera modificada (MAP).",
-    "Reducción de micraje sin sacrificar resistencia (Sostenibilidad)."
+  title: "Film de Empaque Termoformado Cryovac",
+  menuTitle: "Film de Empaque Termoformado",
+  images: [
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-2-scaled.jpg",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/Film-Cryovac.webp",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-6-scaled.jpg"
   ]
+  // ... other properties
 }
 ```
 
@@ -101,381 +146,190 @@ The `solutionsData` array contains 5 solutions:
 {
   id: '3',
   slug: 'absorbentes-tipo-almohadilla',
-  title: "Absorbentes Tipo Almohadilla",
-  description: "Frescura máxima y presentación impecable. Optimizan la conservación y evitan derrames.",
-  icon: Droplets,
-  features: [
-    "Núcleo de celulosa virgen y polímeros superabsorbentes.",
-    "Retención de líquido bajo presión (el líquido no regresa).",
-    "Variedad de colores (Blanco, Negro, Rojo) para branding.",
-    "Disponibles en formatos precortados o en rollo.",
-    "Certificación FDA para contacto directo con alimentos."
+  title: "Absorbentes Tipo Almohadilla Aprobadas Globalmente",
+  menuTitle: "Absorbentes Tipo Almohadilla",
+  images: [
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-4-scaled.jpg",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/Absorbentes.webp",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-5-scaled.png",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-foto-5-scaled.jpg"
   ]
+  // ... other properties
 }
 ```
 
-### 4. Foils para Etiquetas
+### 4. Foils para elaboración de etiquetas
 
 ```tsx
 {
   id: '4',
   slug: 'foils-para-etiquetas',
-  title: "Foils para Etiquetas",
-  description: "Visibilidad y resistencia. Soportan procesos de congelación y cocción.",
-  icon: Tag,
-  features: [
-    "Adhesivos especiales para superficies frías y húmedas.",
-    "Resistencia a la abrasión y al roce durante el transporte.",
-    "Calidad de impresión fotográfica.",
-    "Materiales sintéticos resistentes al desgarro.",
-    "Cumplimiento con normativas de etiquetado alimentario."
+  menuTitle: "Foils para elaboración de etiquetas",
+  images: [
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/Foils-Etiquetas.webp",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-imagen-3.jpeg"
   ]
+  // ... other properties
 }
 ```
 
-### 5. Foils de Marcación (Data Variable)
+### 5. Foils de marcación
 
 ```tsx
 {
   id: '5',
   slug: 'foils-de-marcacion',
-  title: "Foils de Marcación (Data Variable)",
-  description: "Codificación precisa. Cintas de transferencia térmica para trazabilidad perfecta.",
-  icon: PenTool,
-  features: [
-    "Alta definición para códigos de barras y textos pequeños.",
-    "Excelente anclaje sobre sustratos plásticos (PE, PP, PET).",
-    "Resistencia a solventes y aceites.",
-    "Formulaciones libres de metales pesados.",
-    "Cabezales de impresión protegidos gracias al back-coating."
+  menuTitle: "Foils de marcación",
+  images: [
+    "http://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/Foils-Marcacion.webp",
+    "https://cms.gobigagency.co/vencol/wp-content/uploads/sites/3/2026/02/vencol-imagen-4.jpeg-1-scaled.png"
   ]
+  // ... other properties
 }
 ```
 
 ## Usage Examples
 
-### 1. Solutions List Page
+### 1. Navbar Dropdown Menu
 
-```tsx
-import { solutionsData } from '@/data/solutions';
-import Link from 'next/link';
+From `components/Navbar.tsx:16`:
 
-function SolutionsPage() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {solutionsData.map((solution) => {
-        const Icon = solution.icon;
-        return (
-          <div key={solution.id} className="border rounded-lg p-6">
-            <Icon className="w-12 h-12 mb-4 text-brand-green" />
-            <h3 className="text-xl font-bold mb-2">{solution.title}</h3>
-            <p className="text-gray-600 mb-4">{solution.description}</p>
-            <Link 
-              href={`/soluciones/${solution.slug}`}
-              className="text-brand-green hover:underline"
-            >
-              Ver detalles →
-            </Link>
-          </div>
-        );
-      })}
+```tsx components/Navbar.tsx
+const solutionsData = siteContent.solutions.items;
+
+// Desktop dropdown
+{solutionsData.map((solution) => (
+  <Link
+    key={solution.id}
+    to={`/soluciones/${solution.slug}`}
+    className="block px-4 py-3 hover:bg-white/5 transition-colors"
+  >
+    <div className="flex items-center gap-3">
+      <solution.icon className="w-5 h-5 text-brand-green flex-shrink-0" />
+      <span className="text-sm text-gray-200 hover:text-white">
+        {solution.menuTitle}
+      </span>
     </div>
-  );
-}
+  </Link>
+))}
 ```
 
-### 2. Solution Detail Page (Dynamic Route)
+### 2. Solution Detail Page
 
-```tsx
-import { solutionsData } from '@/data/solutions';
-import { GetStaticPaths, GetStaticProps } from 'next';
-import { Service } from '@/types';
+From `pages/SolutionDetail.tsx:12`:
 
-type Props = {
-  solution: Service;
-};
+```tsx pages/SolutionDetail.tsx
+const { slug } = useParams<{ slug: string }>();
+const solution = siteContent.solutions.items.find(s => s.slug === slug);
 
-export default function SolutionDetailPage({ solution }: Props) {
-  const Icon = solution.icon;
-  
-  return (
-    <div>
-      <div className="flex items-center gap-4 mb-6">
-        <Icon className="w-16 h-16 text-brand-green" />
-        <h1 className="text-4xl font-bold">{solution.title}</h1>
-      </div>
-      
-      <p className="text-xl text-gray-600 mb-8">{solution.description}</p>
-      
-      <div className="prose max-w-none mb-8">
-        <p>{solution.longDescription}</p>
-      </div>
-      
-      <img 
-        src={solution.image} 
-        alt={solution.title}
-        className="w-full rounded-lg mb-8"
-      />
-      
-      <h2 className="text-2xl font-bold mb-4">Características</h2>
-      <ul className="space-y-2">
-        {solution.features.map((feature, index) => (
-          <li key={index} className="flex items-start">
-            <span className="text-brand-green mr-2">✓</span>
-            {feature}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+if (!solution) {
+  return <div>Solución no encontrada</div>;
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const paths = solutionsData.map((solution) => ({
-    params: { slug: solution.slug },
-  }));
-  
-  return { paths, fallback: false };
-};
+// Hero section with first image
+<img src={solution.images[0]} alt={solution.title} />
 
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
-  const solution = solutionsData.find((s) => s.slug === params?.slug);
-  
-  if (!solution) {
-    return { notFound: true };
-  }
-  
-  return {
-    props: { solution },
-  };
-};
+// Content sections with subtitles
+<h3>{solution.subtitle1}</h3>
+<p>{solution.subtitle1Description}</p>
+
+<h3>{solution.subtitle2}</h3>
+<p>{solution.subtitle2Description}</p>
+
+// Image gallery with all images
+<div className="grid grid-cols-2 gap-6">
+  {solution.images.map((img, idx) => (
+    <img key={idx} src={img} alt={`${solution.title} - ${idx + 1}`} />
+  ))}
+</div>
 ```
 
-### 3. Solutions Navigation Menu
+### 3. Features Sidebar
 
-```tsx
-import { solutionsData } from '@/data/solutions';
-import Link from 'next/link';
+From `pages/SolutionDetail.tsx:112-121`:
 
-function SolutionsDropdown() {
-  return (
-    <div className="dropdown">
-      <button>Soluciones</button>
-      <div className="dropdown-menu">
-        {solutionsData.map((solution) => (
-          <Link 
-            key={solution.id}
-            href={`/soluciones/${solution.slug}`}
-            className="dropdown-item"
-          >
-            {solution.title}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
+```tsx pages/SolutionDetail.tsx
+<h3>Características Clave</h3>
+<ul className="space-y-4">
+  {solution.features.map((feature, idx) => (
+    <li key={idx} className="flex items-start text-gray-300">
+      <Check className="w-3 h-3 text-brand-green" />
+      <span>{feature}</span>
+    </li>
+  ))}
+</ul>
 ```
 
-### 4. Featured Solutions Grid
+### 4. SEO Meta Tags
 
-```tsx
-import { solutionsData } from '@/data/solutions';
-
-function FeaturedSolutions() {
-  // Show only first 3 solutions
-  const featured = solutionsData.slice(0, 3);
-  
-  return (
-    <section className="py-16">
-      <h2 className="text-3xl font-bold mb-8">Nuestras Soluciones Principales</h2>
-      <div className="grid grid-cols-3 gap-6">
-        {featured.map((solution) => {
-          const Icon = solution.icon;
-          return (
-            <div key={solution.id} className="text-center">
-              <div className="flex justify-center mb-4">
-                <Icon className="w-16 h-16 text-brand-green" />
-              </div>
-              <h3 className="font-bold mb-2">{solution.title}</h3>
-              <p className="text-sm text-gray-600">{solution.description}</p>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-```
-
-### 5. Solution Finder by ID
-
-```tsx
-import { solutionsData } from '@/data/solutions';
-
-function getSolutionById(id: string) {
-  return solutionsData.find(solution => solution.id === id);
-}
-
-function getSolutionBySlug(slug: string) {
-  return solutionsData.find(solution => solution.slug === slug);
-}
-
-// Usage
-const solution = getSolutionBySlug('bolsas-termoencogibles-cryovac');
-if (solution) {
-  console.log(solution.title); // "Bolsas Termoencogibles Cryovac"
-}
-```
-
-### 6. Solutions Features List
-
-```tsx
-import { solutionsData } from '@/data/solutions';
-
-function AllSolutionsFeatures() {
-  return (
-    <div>
-      {solutionsData.map((solution) => (
-        <div key={solution.id} className="mb-8">
-          <h3 className="text-xl font-bold mb-3">{solution.title}</h3>
-          <ul className="list-disc pl-6 space-y-1">
-            {solution.features.map((feature, index) => (
-              <li key={index} className="text-gray-700">{feature}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
-}
-```
-
-### 7. Search and Filter
-
-```tsx
-import { solutionsData } from '@/data/solutions';
-import { useState } from 'react';
-
-function SolutionsSearch() {
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const filteredSolutions = solutionsData.filter((solution) =>
-    solution.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    solution.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  return (
-    <div>
-      <input
-        type="text"
-        placeholder="Buscar soluciones..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full p-3 border rounded mb-6"
-      />
-      
-      <div className="grid gap-4">
-        {filteredSolutions.map((solution) => (
-          <div key={solution.id} className="border p-4 rounded">
-            <h3 className="font-bold">{solution.title}</h3>
-            <p className="text-sm text-gray-600">{solution.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+```tsx pages/SolutionDetail.tsx
+<SEO 
+  title={solution.title} 
+  description={solution.description} 
+  image={solution.images[0]} 
+  url={`${siteContent.meta.siteUrl}/soluciones/${solution.slug}`}
+/>
 ```
 
 ## Icon Components
 
-All icons are imported from `lucide-react`. Here are the icons used:
+Icons are imported from `lucide-react`:
 
-```tsx
-import { 
-  Package,      // Bolsas Termoencogibles
-  Layers,       // Film Termoformado
-  Droplets,     // Absorbentes
-  Tag,          // Foils para Etiquetas
-  PenTool       // Foils de Marcación
-} from 'lucide-react';
+```tsx data/data.tsx
+import { Package, Layers, Droplets, Tag, PenTool } from 'lucide-react';
+
+// Usage in solution objects
+{
+  icon: Package,  // Component reference, not JSX
+  // ... other fields
+}
 ```
 
-## Relationship with siteContent
+### Rendering Icons
 
-Note that `siteContent.solutions.items` (from `data/data.tsx`) contains the same solutions but with additional properties:
+```tsx
+// Extract the component first
+const Icon = solution.icon;
 
-- `menuTitle` - Alternative title for menu display
-- `subtitle1` and `subtitle1Description`
-- `subtitle2` and `subtitle2Description`
-- `images` - Array of multiple images instead of single `image`
-
-Both arrays use the same `Service` type from `source/types`.
+// Then render it
+<Icon className="w-6 h-6 text-brand-green" />
+```
 
 ## Best Practices
 
-### 1. Type Safety
+<Tip>
+  **Use menuTitle for navigation:** The `menuTitle` field provides shorter, menu-friendly versions of product names.
+</Tip>
 
-```tsx
-import { Service } from '@/types';
-import { solutionsData } from '@/data/solutions';
+<Tip>
+  **Multiple images:** All solutions have 2-4 images in the `images` array. Use `images[0]` for hero/card views and map over the full array for galleries.
+</Tip>
 
-type SolutionCardProps = {
-  solution: Service;
-};
+<Note>
+  **Type safety:** The items array is typed as `Service[]` from `types.ts:19-33`, ensuring all required fields are present.
+</Note>
 
-function SolutionCard({ solution }: SolutionCardProps) {
-  const Icon = solution.icon;
-  return (
-    <div>
-      <Icon />
-      <h3>{solution.title}</h3>
-    </div>
-  );
-}
+## Related Documentation
+
+- [Service Type](/api/types/service) - TypeScript interface definition
+- [Solution Detail Page](/pages/solutions) - How solutions are rendered
+- [Navbar Component](/components/navbar) - Dropdown menu implementation
+
+## Data Structure Diagram
+
 ```
-
-### 2. Icon Rendering
-
-```tsx
-// Always extract the icon component before rendering
-const Icon = solution.icon;
-<Icon className="w-6 h-6" />
-
-// NOT like this:
-{solution.icon} // This won't work
+siteContent.solutions
+├── hero
+│   ├── title: string
+│   └── description: string
+├── custom
+│   ├── title: string
+│   ├── description: string
+│   └── cta: string
+└── items: Service[]
+    ├── [0] Bolsas termoencogibles (2 images)
+    ├── [1] Film termoformado (3 images)
+    ├── [2] Absorbentes (4 images)
+    ├── [3] Foils etiquetas (2 images)
+    └── [4] Foils marcación (2 images)
 ```
-
-### 3. Static Path Generation
-
-```tsx
-// For Next.js static generation
-export async function getStaticPaths() {
-  return {
-    paths: solutionsData.map((solution) => ({
-      params: { slug: solution.slug }
-    })),
-    fallback: false
-  };
-}
-```
-
-### 4. SEO-Friendly URLs
-
-```tsx
-// Use slugs for clean URLs
-// Good: /soluciones/bolsas-termoencogibles-cryovac
-// Bad:  /soluciones/1
-
-const url = `/soluciones/${solution.slug}`;
-```
-
-## Notes
-
-- All 5 solutions are food packaging products for the Latin American market
-- Content is in Spanish
-- Icons are functional React components, not strings or image URLs
-- IDs are strings ('1', '2', etc.), not numbers
-- Image URLs point to Unsplash placeholder images
-- Features arrays contain 5 items each

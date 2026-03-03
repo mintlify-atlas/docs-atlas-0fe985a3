@@ -1,0 +1,237 @@
+---
+title: Blog Detail Page
+description: Individual blog post page component that displays full article content from WordPress CMS or static data
+---
+
+# Blog Detail Page
+
+The `BlogDetail` page component renders a full blog post article with metadata, featured image, and formatted content. It fetches posts from WordPress CMS by slug or falls back to static data.
+
+## Location
+
+**File:** `pages/BlogDetail.tsx`  
+**Route:** `/blog/:slug`
+
+## Features
+
+- **Dynamic routing** with slug parameter from URL
+- **WordPress integration** via `fetchBlogPosts` to find post by slug
+- **Static fallback** using `siteContent.blog.posts` when WordPress unavailable
+- **SEO optimization** with dynamic meta tags
+- **Loading state** while fetching WordPress data
+- **404 handling** for non-existent slugs
+- **Responsive layout** with featured image, metadata, and content
+
+## Route Configuration
+
+Defined in `App.tsx:36`:
+
+```tsx App.tsx
+<Route path="/blog/:slug" element={<BlogDetail />} />
+```
+
+Example URL: `https://example.com/blog/que-es-la-mioglobina`
+
+## Data Flow
+
+<Steps>
+  <Step title="Extract slug from URL">
+    Uses `useParams` hook from React Router to get the slug parameter:
+    
+    ```tsx
+    const { slug } = useParams<{ slug: string }>();
+    ```
+  </Step>
+
+  <Step title="Fetch WordPress posts">
+    Attempts to fetch all posts from WordPress:
+    
+    ```tsx
+    const [posts, setPosts] = useState<BlogPost[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      fetchBlogPosts()
+        .then((wpPosts) => {
+          if (wpPosts.length > 0) setPosts(wpPosts);
+          else setPosts(siteContent.blog.posts);
+        })
+        .catch(() => setPosts(siteContent.blog.posts))
+        .finally(() => setLoading(false));
+    }, []);
+    ```
+  </Step>
+
+  <Step title="Find post by slug">
+    Searches the posts array for a matching slug:
+    
+    ```tsx
+    const post = posts.find(p => p.slug === slug);
+    ```
+  </Step>
+
+  <Step title="Render post or 404">
+    Displays the post if found, otherwise shows "not found" message.
+  </Step>
+</Steps>
+
+## Component Structure
+
+### Hero Section
+
+Displays category badge, title, metadata, and featured image:
+
+```tsx pages/BlogDetail.tsx
+<div className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+  <div className="absolute inset-0 z-0">
+    <img 
+      src={post.image} 
+      alt={post.title} 
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-brand-dark/80 backdrop-blur-[2px]"></div>
+  </div>
+
+  <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+    <span className="inline-block px-4 py-2 bg-brand-green/20 text-brand-green rounded-full text-sm font-semibold mb-4">
+      {post.category}
+    </span>
+    <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+      {post.title}
+    </h1>
+    <div className="flex items-center justify-center gap-6 text-gray-300">
+      <span className="flex items-center gap-2">
+        <Calendar className="w-4 h-4" />
+        {post.date}
+      </span>
+    </div>
+  </div>
+</div>
+```
+
+### Content Section
+
+Renders HTML content from WordPress using `dangerouslySetInnerHTML`:
+
+```tsx pages/BlogDetail.tsx
+<div className="max-w-4xl mx-auto px-4 py-20">
+  <GlassCard className="p-8 md:p-12">
+    <div 
+      className="prose prose-invert prose-lg max-w-none"
+      dangerouslySetInnerHTML={{ __html: post.content }}
+    />
+  </GlassCard>
+</div>
+```
+
+<Warning>
+  **Security Note:** The component uses `dangerouslySetInnerHTML` to render WordPress HTML. Ensure your WordPress instance is trusted and sanitizes content properly.
+</Warning>
+
+### Loading State
+
+```tsx pages/BlogDetail.tsx
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-green mx-auto mb-4"></div>
+        <p>Cargando artículo...</p>
+      </div>
+    </div>
+  );
+}
+```
+
+### 404 State
+
+```tsx pages/BlogDetail.tsx
+if (!post) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <SEO title="Artículo no encontrado" />
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">Artículo no encontrado</h2>
+        <Link to="/blog" className="text-brand-green hover:underline">
+          Volver al Blog
+        </Link>
+      </div>
+    </div>
+  );
+}
+```
+
+## SEO Integration
+
+Dynamic SEO tags based on post data:
+
+```tsx pages/BlogDetail.tsx
+<SEO 
+  title={post.title}
+  description={post.excerpt}
+  image={post.image}
+  url={`${siteContent.meta.siteUrl}/blog/${post.slug}`}
+/>
+```
+
+## Styling
+
+The blog content uses Tailwind Typography plugin classes:
+
+- `prose` - Base typography styles
+- `prose-invert` - Light text on dark background
+- `prose-lg` - Larger font sizes for readability
+- `max-w-none` - Remove default max-width constraint
+
+These classes are configured via CDN in `index.html:35`:
+
+```html index.html
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+```
+
+## WordPress vs Static Data
+
+The component gracefully handles both data sources:
+
+| Source | When Used | Data Location |
+|--------|-----------|---------------|
+| **WordPress** | When API is available and returns posts | `lib/wordpress.ts:69-80` |
+| **Static** | When WordPress fails or returns empty | `data/data.tsx` blog.posts array |
+
+## Usage Example
+
+Navigation from Blog listing page:
+
+```tsx pages/Blog.tsx
+<Link to={`/blog/${post.slug}`}>
+  <GlassCard hoverEffect>
+    <img src={post.image} alt={post.title} />
+    <h3>{post.title}</h3>
+    <p>{post.excerpt}</p>
+  </GlassCard>
+</Link>
+```
+
+## Related Components
+
+- [Blog Page](/pages/blog) - Blog listing page
+- [SEO Component](/components/seo) - Meta tags management
+- [GlassCard](/components/ui-components#glasscard) - Card wrapper
+
+## Related Types
+
+- [BlogPost](/api/types/blog-post) - Blog post data structure
+
+## Back Navigation
+
+The page includes a back link to the blog listing:
+
+```tsx pages/BlogDetail.tsx
+<Link 
+  to="/blog" 
+  className="inline-flex items-center text-glass-muted hover:text-white mb-6 transition-colors group"
+>
+  <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+  Volver al Blog
+</Link>
+```

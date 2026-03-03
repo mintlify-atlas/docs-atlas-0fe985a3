@@ -1,0 +1,277 @@
+---
+title: Page Detail Component
+description: Dynamic WordPress page renderer that fetches and displays custom pages by slug in the VENCOL Front Template
+---
+
+# Page Detail Component
+
+The `PageDetail` component is a catch-all route handler that fetches and renders WordPress pages by their slug. It enables content editors to create custom pages in WordPress CMS without requiring code changes.
+
+## Location
+
+**File:** `pages/PageDetail.tsx`  
+**Route:** `/:slug` (catch-all)
+
+## Purpose
+
+This component allows non-technical users to:
+- Create new pages in WordPress admin
+- Publish content without deploying code
+- Maintain consistent branding and layout
+- Add custom landing pages, legal pages, or campaign pages
+
+## Route Configuration
+
+Defined in `App.tsx:39` as the last route (catch-all):
+
+```tsx App.tsx
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/nosotros" element={<About />} />
+  <Route path="/soluciones/:slug" element={<SolutionDetail />} />
+  <Route path="/blog" element={<Blog />} />
+  <Route path="/blog/:slug" element={<BlogDetail />} />
+  <Route path="/contacto" element={<Contact />} />
+  {/* Catch-all: WordPress pages by slug — must be last */}
+  <Route path="/:slug" element={<PageDetail />} />
+</Routes>
+```
+
+<Warning>
+  **Route Order Matters:** This route MUST be last in the Routes list. If placed earlier, it would intercept all routes including `/nosotros`, `/blog`, etc.
+</Warning>
+
+## Data Flow
+
+<Steps>
+  <Step title="Extract slug from URL">
+    Uses React Router's `useParams` to get the page slug:
+    
+    ```tsx
+    const { slug } = useParams<{ slug: string }>();
+    ```
+    
+    Example: URL `https://example.com/privacy-policy` → slug = `"privacy-policy"`
+  </Step>
+
+  <Step title="Fetch WordPress page">
+    Calls `fetchWPPageBySlug` to retrieve page data:
+    
+    ```tsx
+    const [page, setPage] = useState<WPPage | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+      if (!slug) return;
+      
+      fetchWPPageBySlug(slug)
+        .then((wpPage) => {
+          if (wpPage) setPage(wpPage);
+          else setError(true);
+        })
+        .catch(() => setError(true))
+        .finally(() => setLoading(false));
+    }, [slug]);
+    ```
+  </Step>
+
+  <Step title="Render page content">
+    Displays the fetched page with title, featured image, and HTML content.
+  </Step>
+</Steps>
+
+## Component Structure
+
+### Hero Section
+
+```tsx pages/PageDetail.tsx
+<div className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+  {page.image && (
+    <div className="absolute inset-0 z-0">
+      <img 
+        src={page.image} 
+        alt={page.title} 
+        className="w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-brand-dark/80 backdrop-blur-[2px]"></div>
+    </div>
+  )}
+
+  <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+    <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+      {page.title}
+    </h1>
+  </div>
+</div>
+```
+
+### Content Section
+
+Renders WordPress HTML using Tailwind Typography:
+
+```tsx pages/PageDetail.tsx
+<div className="max-w-4xl mx-auto px-4 py-20">
+  <GlassCard className="p-8 md:p-12">
+    <div 
+      className="prose prose-invert prose-lg max-w-none"
+      dangerouslySetInnerHTML={{ __html: page.content }}
+    />
+  </GlassCard>
+</div>
+```
+
+<Warning>
+  **Security:** Uses `dangerouslySetInnerHTML` to render WordPress HTML. Only use with trusted WordPress sources that sanitize content.
+</Warning>
+
+## State Management
+
+### Loading State
+
+```tsx pages/PageDetail.tsx
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-green mx-auto mb-4"></div>
+        <p>Cargando página...</p>
+      </div>
+    </div>
+  );
+}
+```
+
+### Error/404 State
+
+```tsx pages/PageDetail.tsx
+if (error || !page) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <SEO title="Página no encontrada" />
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-4">Página no encontrada</h2>
+        <p className="text-gray-300 mb-6">
+          La página que buscas no existe o ha sido eliminada.
+        </p>
+        <Link to="/" className="text-brand-green hover:underline">
+          Volver al Inicio
+        </Link>
+      </div>
+    </div>
+  );
+}
+```
+
+## SEO Configuration
+
+```tsx pages/PageDetail.tsx
+<SEO 
+  title={page.title}
+  description={page.excerpt || page.title}
+  image={page.image}
+  url={`${siteContent.meta.siteUrl}/${slug}`}
+/>
+```
+
+## WordPress API Integration
+
+Uses `fetchWPPageBySlug` from `lib/wordpress.ts:82-94`:
+
+```typescript lib/wordpress.ts
+export async function fetchWPPageBySlug(slug: string): Promise<WPPage | null> {
+  const res = await fetch(
+    `${WP_API_URL}/pages?slug=${encodeURIComponent(slug)}&_embed`
+  );
+
+  if (!res.ok) {
+    throw new Error(`WordPress API error: ${res.status}`);
+  }
+
+  const pages: WPPost[] = await res.json();
+  if (pages.length === 0) return null;
+  return mapWPPageToWPPage(pages[0]);
+}
+```
+
+## Creating Pages in WordPress
+
+<Steps>
+  <Step title="Log into WordPress admin">
+    Access your WordPress dashboard at `https://your-cms.com/wp-admin`
+  </Step>
+
+  <Step title="Create a new page">
+    Go to **Pages → Add New** and create your content with the WordPress editor.
+  </Step>
+
+  <Step title="Set the page slug">
+    In the page settings, set a URL-friendly slug (e.g., `privacy-policy`).
+  </Step>
+
+  <Step title="Add featured image (optional)">
+    Set a featured image for the hero section background.
+  </Step>
+
+  <Step title="Publish">
+    Click **Publish**. The page is immediately accessible at `https://your-site.com/{slug}`
+  </Step>
+</Steps>
+
+## Use Cases
+
+### Legal Pages
+- `/privacy-policy` - Privacy policy
+- `/terms-of-service` - Terms and conditions  
+- `/cookie-policy` - Cookie usage policy
+
+### Marketing Pages
+- `/promo-2024` - Seasonal campaigns
+- `/partner-program` - Partnership information
+- `/case-studies` - Customer success stories
+
+### Support Pages
+- `/shipping-info` - Shipping and delivery details
+- `/returns` - Return policy
+- `/faq-extended` - Extended FAQ content
+
+## Navigation Integration
+
+Add WordPress pages to footer or navigation:
+
+```tsx components/Footer.tsx
+<Link to="/privacy-policy">Privacy Policy</Link>
+<Link to="/terms-of-service">Terms of Service</Link>
+```
+
+## Related Components
+
+- [Blog Detail](/pages/blog-detail) - Blog post renderer
+- [SEO Component](/components/seo) - Meta tags
+- [GlassCard](/components/ui-components#glasscard) - Content wrapper
+
+## Related Types
+
+- [WPPage](/api/types/wp-page) - WordPress page data structure
+
+## Error Handling
+
+The component handles:
+- **Network errors** - WordPress API unreachable
+- **404 errors** - Page slug doesn't exist
+- **Missing slug** - No slug parameter in URL
+- **CORS errors** - WordPress CORS not configured
+
+## Best Practices
+
+<Tip>
+  **Use descriptive slugs:** Choose slugs that clearly indicate content (e.g., `shipping-policy` not `page-1`)
+</Tip>
+
+<Tip>
+  **Set featured images:** Hero sections look better with background images. Use high-quality, relevant visuals.
+</Tip>
+
+<Note>
+  **Cache considerations:** WordPress REST API responses can be cached. If content doesn't update immediately, clear cache or check WordPress caching plugins.
+</Note>

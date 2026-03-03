@@ -57,7 +57,9 @@
               "pages/about",
               "pages/solutions",
               "pages/blog",
-              "pages/contact"
+              "pages/blog-detail",
+              "pages/contact",
+              "pages/page-detail"
             ]
           },
           {
@@ -80,7 +82,9 @@
               "api/types/nav-link",
               "api/types/blog-post",
               "api/types/service",
-              "api/types/wp-page"
+              "api/types/wp-page",
+              "api/types/stat",
+              "api/types/faq-item"
             ]
           },
           {

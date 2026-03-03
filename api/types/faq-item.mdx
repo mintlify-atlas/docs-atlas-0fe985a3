@@ -1,0 +1,151 @@
+---
+title: FaqItem
+description: TypeScript interface for FAQ (Frequently Asked Questions) entries in the VENCOL Front Template
+---
+
+## Overview
+
+The `FaqItem` interface represents a single FAQ entry with a question and answer pair. Used primarily on the home page to address common customer inquiries about products, services, and processes.
+
+## Type Definition
+
+```typescript
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+```
+
+**Source:** `types.ts:40-43`
+
+## Properties
+
+<ParamField path="question" type="string" required>
+  The question text, typically starting with interrogative words ("¿Qué..?", "¿Cómo..?", "¿Por qué..?").
+</ParamField>
+
+<ParamField path="answer" type="string" required>
+  The answer text providing clear, concise information. Can be multiple sentences but should remain focused.
+</ParamField>
+
+## Usage Example
+
+From `data/data.tsx`, the home page FAQ section uses an array of FaqItem objects:
+
+```typescript data/data.tsx
+import { FaqItem } from '../types';
+
+export const siteContent = {
+  home: {
+    faq: {
+      title: "Preguntas Frecuentes",
+      items: [
+        {
+          question: "¿Qué es la mioglobina y por qué importa controlarla?",
+          answer: "La mioglobina es una proteína del músculo que al mezclarse con agua genera un líquido rojo en bandejas de carne. No es sangre. Controlarla mejora la percepción de frescura, reduce la carga bacteriana y alarga la vida útil del producto."
+        },
+        {
+          question: "¿Qué diferencia hay entre una bolsa termoencogible y un film estándar?",
+          answer: "Las bolsas termoencogibles se ajustan al producto con calor, eliminando el aire residual y creando una barrera superior contra oxígeno y humedad. Los films estándar no tienen esa capacidad de ajuste ni el mismo nivel de barrera."
+        },
+        {
+          question: "¿Vencol ofrece muestras o pruebas en planta?",
+          answer: "Sí. Ofrecemos muestras técnicas y evaluación en planta para validar que nuestras soluciones se adapten a tus líneas de producción y necesidades específicas."
+        },
+        {
+          question: "¿Los productos tienen certificación para alimentos?",
+          answer: "Todos nuestros materiales cuentan con certificación FDA para contacto directo con alimentos, garantizando seguridad y cumplimiento normativo."
+        }
+      ] as FaqItem[]
+    }
+  }
+};
+```
+
+### Rendering FAQs with Accordion
+
+The Home page (`pages/Home.tsx`) renders FAQs using an interactive accordion:
+
+```tsx pages/Home.tsx
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+
+const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+const toggleFaq = (index: number) => {
+  setOpenFaqIndex(openFaqIndex === index ? null : index);
+};
+
+{home.faq.items.map((faq, index) => (
+  <div key={index} className="glass-panel rounded-xl overflow-hidden">
+    <button
+      onClick={() => toggleFaq(index)}
+      className="w-full px-6 py-5 text-left flex justify-between items-center"
+    >
+      <span className="font-semibold text-white text-lg">
+        {faq.question}
+      </span>
+      <ChevronDown
+        className={`w-5 h-5 text-brand-green transition-transform ${
+          openFaqIndex === index ? 'rotate-180' : ''
+        }`}
+      />
+    </button>
+    {openFaqIndex === index && (
+      <div className="px-6 pb-6 text-gray-300 leading-relaxed">
+        {faq.answer}
+      </div>
+    )}
+  </div>
+))}
+```
+
+## Best Practices
+
+<Tip>
+  **Questions should be specific**: Avoid vague questions like "¿Cómo funciona?" - instead use "¿Cómo funcionan las bolsas termoencogibles?"
+</Tip>
+
+<Tip>
+  **Answers should be concise**: Aim for 2-4 sentences. If more detail is needed, link to a dedicated page or guide.
+</Tip>
+
+<Warning>
+  Avoid HTML in question/answer text. The FAQ component renders plain text only. Use line breaks sparingly.
+</Warning>
+
+## Common FAQ Patterns
+
+### Product Questions
+- What is [product] and how does it work?
+- What's the difference between [product A] and [product B]?
+- Do you offer [specific feature]?
+
+### Process Questions  
+- How do I order/request samples?
+- What certifications do you have?
+- Do you ship to [location]?
+
+### Support Questions
+- How can I contact technical support?
+- What's your return/refund policy?
+- Do you offer training/installation?
+
+## Related Types
+
+- [Stat](/api/types/stat) - Statistical metrics
+- [BlogPost](/api/types/blog-post) - Blog article data
+
+## State Management
+
+FAQs typically use accordion-style interaction with local state:
+
+```tsx
+const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+// Opens first FAQ by default
+
+const toggleFaq = (index: number) => {
+  setOpenFaqIndex(openFaqIndex === index ? null : index);
+  // Clicking the same FAQ closes it
+};
+```
